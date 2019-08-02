@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="小铁匠Linus">
+
+
+
+<meta name="description" content="在 iOS SDK 中可以发现很多不是很有名的框架或者库。这些框架或库大多数都可以为你节省很多时间，同时也证明它们自己的价值。其中，有一个叫 Quick Look Framework 的框架。即使你之前可能没有听说过它，但是你看到它的名字也就大概知道它的用途了；它可以为应用提供文档预览的功能。">
+<meta name="keywords" content="QuickLook">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 Quick Look Framework 快速预览文档">
+<meta property="og:url" content="http://linusling.com/2016/05/05/quick-look-framework/index.html">
+<meta property="og:site_name" content="小铁匠的 Swift 之路">
+<meta property="og:description" content="在 iOS SDK 中可以发现很多不是很有名的框架或者库。这些框架或库大多数都可以为你节省很多时间，同时也证明它们自己的价值。其中，有一个叫 Quick Look Framework 的框架。即使你之前可能没有听说过它，但是你看到它的名字也就大概知道它的用途了；它可以为应用提供文档预览的功能。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://www.appcoda.com/wp-content/uploads/2016/04/t51_1_file_list.png">
+<meta property="og:image" content="http://www.appcoda.com/wp-content/uploads/2016/04/t51_2_document_preview.png">
+<meta property="og:image" content="http://www.appcoda.com/wp-content/uploads/2016/04/t51_1_file_list.png">
+<meta property="og:image" content="http://www.appcoda.com/wp-content/uploads/2016/04/t51_2_document_preview.png">
+<meta property="og:image" content="http://www.appcoda.com/wp-content/uploads/2016/04/t51_3_activity_view.png">
+<meta property="og:image" content="http://www.appcoda.com/wp-content/uploads/2016/04/t51_4_switch_document.png">
+<meta property="og:updated_time" content="2019-08-02T08:09:56.037Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 Quick Look Framework 快速预览文档">
+<meta name="twitter:description" content="在 iOS SDK 中可以发现很多不是很有名的框架或者库。这些框架或库大多数都可以为你节省很多时间，同时也证明它们自己的价值。其中，有一个叫 Quick Look Framework 的框架。即使你之前可能没有听说过它，但是你看到它的名字也就大概知道它的用途了；它可以为应用提供文档预览的功能。">
+<meta name="twitter:image" content="http://www.appcoda.com/wp-content/uploads/2016/04/t51_1_file_list.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="小铁匠的 Swift 之路" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>使用 Quick Look Framework 快速预览文档 | 小铁匠的 Swift 之路</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?4078fac10f15218bdccb385562d6f888";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">小铁匠Linus</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">Coder, Swift</p>
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页 | Home</a></li>
+                        
+                            <li><a href="/archives">归档 | Archives</a></li>
+                        
+                            <li><a href="/about">简介 | About</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto://linus@swift.gg" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/linusling/" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/LinusLing/" title="GitHub"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/2016/">2016</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2017/">2017</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2018/">2018</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AppleScript/">AppleScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cocoapods/">Cocoapods</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Convert/">Convert</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/QuickLook/">QuickLook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime/">Runtime</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SQL/">SQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shell/">Shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swizzling/">Swizzling</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Time-Consuming/">Time-Consuming</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Typhoon/">Typhoon</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UICollectionView/">UICollectionView</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/contentSize/">contentSize</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/reloadData/">reloadData</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/七牛/">七牛</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/依赖注入/">依赖注入</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/全栈/">全栈</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/崩溃解析/">崩溃解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/微信公众号/">微信公众号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能平台/">性能平台</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/接口测试/">接口测试</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/收藏/">收藏</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动化/">自动化</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://swift.gg/">SwiftGG</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://www.saitjr.com/">Saitjr</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://blog.dianqk.org/">靛青K</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://daizi.me">小袋子</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://www.swiftyper.com">小锅</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://alanmelody.com">JackAlan</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://numbbbbb.com">numbbbbb</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">Be the change you want to see.    From:小铁匠Linus</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">小铁匠Linus</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">小铁匠Linus</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">Coder, Swift</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页 | Home</a></li>
+                
+                    <li><a href="/archives">归档 | Archives</a></li>
+                
+                    <li><a href="/about">简介 | About</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto://linus@swift.gg" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/linusling/" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/LinusLing/" title="GitHub"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-quick-look-framework" class="article article-type-post" itemscope="" itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/05/05/quick-look-framework/" class="article-date">
+      <time datetime="2016-05-05T05:58:19.000Z" itemprop="datePublished">2016-05-05</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      使用 Quick Look Framework 快速预览文档
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/iOS/">iOS</a><a class="article-category-link" href="/categories/iOS/译/">译</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/QuickLook/">QuickLook</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>在 iOS SDK 中可以发现很多不是很有名的框架或者库。这些框架或库大多数都可以为你节省很多时间，同时也证明它们自己的价值。其中，有一个叫 <em>Quick Look Framework</em> 的框架。即使你之前可能没有听说过它，但是你看到它的名字也就大概知道它的用途了；它可以为应用提供文档预览的功能。</p>
+<a id="more"></a>
+<p>Quick Look Framework 使用起来很简单，它可以预览特定类型的文件。它支持的文件类型有：</p>
+<ul>
+<li>iWork 文档 (Pages，Numbers 和 Keynote)</li>
+<li>Microsoft Office 文档 (只要是 Office 97 或更新的版本都支持)</li>
+<li>PDF 文件</li>
+<li>图片</li>
+<li>文本文件</li>
+<li>富文本格式文档</li>
+<li>CSV</li>
+</ul>
+<p>正如你现在所想的那样，如果你的应用程序正在处理上述文件类型的文件，你希望用户能够预览他们的内容，这个框架就会变得非常方便。不仅如此，Quick Look Framework 也提供了分享功能。发送或者共享预览中的文档会呈现一个 activity controller(<code>UIActivityViewController</code>)。</p>
+<p>开发者使用 Quick Look Framework 的主要任务是提供一个可以为 preview controller 打开特定文档进行预览的 <code>datasource</code>。该 datasource 实际上是一个 <code>NSURL</code> 对象的列表，它指定了每个文档的路径，该路径可以是本地存储的，也可以是网络地址。本地存储的文件包括存在 documents directory 或者 bundle 等。</p>
+<p>Quick Look Framework 提供了一个叫 <code>QLPreviewController</code>(Quick Look Preview Controller) 的视图控制器，用来快速查看一个文档。该视图控制器可以以模态的形式呈现，如果应用有 navagation 也可以通过压入 navigation 栈来呈现。它是 Quick Look Framework 重要的一个组件，一旦它呈现出来，就会提供分享选项，也可以在不关闭预览控制器的情况下切换所有其它可以预览的文档。另外，Quick Look Framework 有两个 datasource 方法需要实现，这两个方法属于 <code>QLPreviewControllerDataSource</code> 协议。除此之外，还有个 <code>QLPreviewControllerDelegate</code> 协议是可选实现的，如果实现的话，能够丰富 Quick Look Framework 的其它功能。</p>
+<p>我们会在接下来的部分讨论具体细节，也会像之前那样用一个具体的 demo 来演示。然而在开始前，我们先快速浏览一下用来演示的 demo。</p>
+<h2 id="关于-demo-APP"><a href="#关于-demo-APP" class="headerlink" title="关于 demo APP"></a>关于 demo APP</h2><p>为了教程的展示需要，我们会使用 navigation 和一个视图控制器。该视图控制器(FileListViewController)会在 tableview 中展示一些文件，这些文件保存在应用的 bundle 里。我们不会使用所有支持的文件类型；只是选用了其中的一部分来说明 Quick Look Framework 是如何使用的。</p>
+<p>当点击 tableview 中对应于文件的那一行时，Quick Look Preview Controller 会打开对应的文档进行预览。Quick Look Preview Controller 会被压入 navigation 栈中，当然我也会展示如何以模态的形式呈现(实际上，与其它呈现模态的视图控制器方式是完全一样的)。最后，我们也会讲一下额外提供的功能(比如，分享和切换文档等功能)，以及讨论一下另外可选的代理方法。</p>
+<p>接下来的截图展示的是初始的视图控制器(<code>FileListViewController</code>)。正如你看到的，每一行都会显示文件名以及其对应的文件类型。</p>
+<center><br><img src="http://www.appcoda.com/wp-content/uploads/2016/04/t51_1_file_list.png" alt=""><br></center>
+
+<p>当一个文档被选中，预览如下：</p>
+<center><br><img src="http://www.appcoda.com/wp-content/uploads/2016/04/t51_2_document_preview.png" alt=""><br></center>
+
+<p>你可以从<a href="https://github.com/simonng/QuickLookDemo/blob/master/QuickLookDemoStarter.zip" target="_blank" rel="noopener">这里</a>或者<a href="https://github.com/LinusLing/LNCodeSet/tree/master/QuickLookDemo/QuickLookDemoStarter" target="_blank" rel="noopener">这里</a>下载工程的初始代码。下载之后，你可以打开快速预览一下，接下去我们会一步步地引导你走下去。</p>
+<h2 id="文件以及文件的-URL"><a href="#文件以及文件的-URL" class="headerlink" title="文件以及文件的 URL"></a>文件以及文件的 URL</h2><p>在初始工程中，你会发现一组我们在 demo 中展示的示例文件。这些文件已经添加到了应用的 bundle 中了，但是要显示预览还远远不够。我们的职责就是来告诉应用，到底哪个文件是需要通过 Quick Look framework 预览的。</p>
+<p>目标已经很明确了，我们创建一个数组，用来保存示例文件的文件名。这些文件名主要有两个用处：</p>
+<ol>
+<li>在 tableview 中正确显示文件名和相关说明</li>
+<li>最重要的是，可以根据这个数组来创建 <code>NSURL</code> 对象的列表，该列表可以作为 Quick Look framework 需要的 datasource，这样它就能够检索和预览每一个文件了。</li>
+</ol>
+<p>在熟悉每个文件名的用处之后，是时候让我们来码代码了。第一件事情就是创建一个保存文件名的数组(包含文件的扩展名)。打开 Xcode 中的 <code>FileListViewController.swift</code> 文件，添加以下代码到文件开头：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> fileNames = [<span class="string">"AppCoda-PDF.pdf"</span>, <span class="string">"AppCoda-Pages.pages"</span>, <span class="string">"AppCoda-Word.docx"</span>, <span class="string">"AppCoda-Keynote.key"</span>, <span class="string">"AppCoda-Text.txt"</span>, <span class="string">"AppCoda-Image.jpeg"</span>]</span><br></pre></td></tr></table></figure>
+<p>在我们的例子中，我们已经知道了需要预览文件的文件名，因此声明和使用 <code>fileNames</code> 数组都很容易。但是，真实应用中不可能事先就让你保存有所有需要预览的文件的(文件可能需要下载等)。在这种情况下，你必须动态地添加数据到这个数组中，再从数组中获取相应的文件名。</p>
+<p>现在，让我们先声明：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> fileURLs = [<span class="type">NSURL</span>]()</span><br></pre></td></tr></table></figure>
+<p>该数组不仅会作为 Quick Look framework 的 datasource，也会作为 tableview 的 datasource。</p>
+<p>现在让我们创建一个新的方法，将值添加到以上的数组中去。在该新方法中，我们会逐个获取 <code>fileNames</code> 数组中的文件名，并相应地创建一个 NSURL 对象。一旦遍历完所有的文件，我们就将所有新建的 NSURL 对象添加到 <code>fileURLs</code> 数组中，这部分的工作就算完成了。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">prepareFileURLs</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> file <span class="keyword">in</span> fileNames &#123;</span><br><span class="line">        <span class="keyword">let</span> fileParts = file.componentsSeparatedByString(<span class="string">"."</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">let</span> fileURL = <span class="type">NSBundle</span>.mainBundle().<span class="type">URLForResource</span>(fileParts[<span class="number">0</span>], withExtension: fileParts[<span class="number">1</span>]) &#123;</span><br><span class="line">            <span class="keyword">if</span> <span class="type">NSFileManager</span>.defaultManager().fileExistsAtPath(fileURL.path!) &#123;</span><br><span class="line">                fileURLs.append(fileURL)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>值得注意的是，我们使用了 <code>String</code> 类中的 <code>componentsSeparatedByString(...)</code> 方法来分割文件名，获取对应的文件名和扩展名。接下来的过程很简单了：使用 <code>NSBundle</code> 类的  <code>URLForResource(...)</code>方法创建一个 <code>NSURL</code> 对象，如果新创建的 NSURL 对象存在对应文件的话，就添加到 <code>fileURLs</code> 数组中。</p>
+<p>现在再到 <code>viewDidLoad()</code> 方法中调用以上的方法：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">viewDidLoad</span><span class="params">()</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line"> </span><br><span class="line">    prepareFileURLs()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="展示文件"><a href="#展示文件" class="headerlink" title="展示文件"></a>展示文件</h2><p>我们已经将 datasource 准备好了，接着会展示需要预览的文件，以及关于它们类型的说明。值得注意的是，这一部分的内容与我们要使用的 Quick Look framework 并没有什么关系，之所以放在文章里是为了让你对自己的工程有点想法。</p>
+<p>我们需要实现的效果如下：</p>
+<center><br><img src="http://www.appcoda.com/wp-content/uploads/2016/04/t51_1_file_list.png" alt=""><br></center>
+
+<p>我们将从每个 <code>NSURL</code> 对象入手，最终获取到对应文件的文件名和扩展名。为了实现这个功能，我们需要将 <code>NSURL</code> 分割。分割的最后一个部分应该是完整的文件名，继续分割就可以得到文件名和扩展名了。</p>
+<p>我上面讲的过程都会在一个新方法中实现。即便下一段代码中并没有什么难度，我还是为每行代码添加了注释。值得注意的是，该方法返回的不是简单的一个值，而是一个 <code>tuple</code>。tuple 中第一个值为文件名，第二个值为文件的扩展名。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">extractAndBreakFilenameInComponents</span><span class="params">(fileURL: NSURL)</span></span> -&gt; (fileName: <span class="type">String</span>, fileExtension: <span class="type">String</span>) &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 将 NSURL 路径分割成零组件，然后创建一个数组将其放置其中</span></span><br><span class="line">    <span class="keyword">let</span> fileURLParts = fileURL.path!.componentsSeparatedByString(<span class="string">"/"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从上面数组的最后一个元素中得到文件名</span></span><br><span class="line">    <span class="keyword">let</span> fileName = fileURLParts.last</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 将文件名基于符号 . 分割成不同的零组件，并放置在数组中返回</span></span><br><span class="line">    <span class="keyword">let</span> filenameParts = fileName?.componentsSeparatedByString(<span class="string">"."</span>)</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 返回最终的元组</span></span><br><span class="line">    <span class="keyword">return</span> (filenameParts![<span class="number">0</span>], filenameParts![<span class="number">1</span>])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面这个方法是一个有用的工具，它主要有两个功能：</p>
+<ol>
+<li>我们会将 tuple 的第一个值显示在 tableview 中。</li>
+<li>我们会针对文件扩展名展示简短的说明。</li>
+</ol>
+<p>让我们一个个来，先来看看 tableview 中的 <code>tableView(tableView:cellForRowAtIndexPath)</code> 方法。将它改成下面的代码(在 cell 重用和返回之间添加相应的代码)，这样你就可以在 cell 中显示文件名了。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">tableView</span><span class="params">(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath)</span></span> -&gt; <span class="type">UITableViewCell</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> cell = tableView.dequeueReusableCellWithIdentifier(<span class="string">"idCellFile"</span>, forIndexPath: indexPath)</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">let</span> currentFileParts = extractAndBreakFilenameInComponents(fileURLs[indexPath.row])</span><br><span class="line"> </span><br><span class="line">    cell.textLabel?.text = currentFileParts.fileName</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> cell</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在让我们来创建另一个自定义的方法。该方法会根据文件返回描述文件类型的字符串。你看，下面的代码一点难度都没有，只有一个 <code>switch</code> 语句决定具体的文件类型。值得注意的是，我只添加了 demo 中需要用到的文件类型，你可以根据你自己的需求来修改并添加删除相应的文件类型。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">getFileTypeFromFileExtension</span><span class="params">(fileExtension: String)</span></span> -&gt; <span class="type">String</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> fileType = <span class="string">""</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">switch</span> fileExtension &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">"docx"</span>:</span><br><span class="line">        fileType = <span class="string">"Microsoft Word document"</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">case</span> <span class="string">"pages"</span>:</span><br><span class="line">        fileType = <span class="string">"Pages document"</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">case</span> <span class="string">"jpeg"</span>:</span><br><span class="line">        fileType = <span class="string">"Image document"</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">case</span> <span class="string">"key"</span>:</span><br><span class="line">        fileType = <span class="string">"Keynote document"</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">case</span> <span class="string">"pdf"</span>:</span><br><span class="line">        fileType = <span class="string">"PDF document"</span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        fileType = <span class="string">"Text document"</span></span><br><span class="line"> </span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> fileType</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>回到 <code>tableView(tableView:cellForRowAtIndexPath)</code> 方法，让我们来添加一行代码来调用上面的方法吧，这样我们就可以在每个 cell 里展示文件类型的描述了。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">tableView</span><span class="params">(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath)</span></span> -&gt; <span class="type">UITableViewCell</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> cell = tableView.dequeueReusableCellWithIdentifier(<span class="string">"idCellFile"</span>, forIndexPath: indexPath)</span><br><span class="line"> </span><br><span class="line">    ...</span><br><span class="line"> </span><br><span class="line">    cell.detailTextLabel?.text = getFileTypeFromFileExtension(currentFileParts.fileExtension)</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> cell</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>还有一件事要做，就是为 tableview 设置正确的行数。如果你仔细看的话，可能注意到了初始工程中对应代码中是返回 0 行的，所以需要修改成我们需要的行数。具体方法如下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">tableView</span><span class="params">(tableView: UITableView, numberOfRowsInSection section: Int)</span></span> -&gt; <span class="type">Int</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> fileURLs.<span class="built_in">count</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果你已经跟进到这里了，那就尝试着运行一下这个应用吧。没什么大问题的话，你的应用也会和文章开头的截图一样。</p>
+<h2 id="Quick-Look-Preview-Controller-Datasource"><a href="#Quick-Look-Preview-Controller-Datasource" class="headerlink" title="Quick Look Preview Controller Datasource"></a>Quick Look Preview Controller Datasource</h2><p>使用 Quick Look framework 的第一件事情就是在类中导入头文件。因此，我们需要在 <code>FileListViewController.swift</code> 文件中，最上面的位置添加如下代码：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> QuickLook</span><br></pre></td></tr></table></figure>
+<p>现在我们要声明并初始化一个使用 Quick Look framework 重要的对象。在 <code>FileListViewController</code> 类的最上面添加如下代码：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> quickLookController = <span class="type">QLPreviewController</span>()</span><br></pre></td></tr></table></figure>
+<p>正如你所见，我更倾向于声明一个全局的 <code>QLPreviewController</code> 对象，当然这不是强制的，你也可以不这么做。另一种方法就是使用局部对象来触发并显示 Quick Look Preview Controller。</p>
+<p>在我们使用 <code>quickLookController</code> 对象之前，我们需要接受 <code>QLPreviewControllerDataSource</code> 协议。这是必须要做的，因为之前提到的一大串方法都需要有 datasource 才行。然而，我们要先在类名之后追加这个协议：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FileListViewController</span>: <span class="title">UIViewController</span>, <span class="title">UITableViewDelegate</span>, <span class="title">UITableViewDataSource</span>, <span class="title">QLPreviewControllerDataSource</span></span></span><br></pre></td></tr></table></figure>
+<p>现在让我们将注意力集中在必须要实现的两个方法上吧。正如我之前提到的，这两个方法会将对应文档的预览在特定情况下展现出来。显然，我们很早前创建的 <code>fileURLs</code> 数组就要派上用场了。</p>
+<p>第一个方法指定了有多少个文件需要在 Quick Look Preview Controller 中预览。在我们的 demo 中这个数字就等于 <code>fileURLs</code> 中文件的总数，因此，我们需要做的就是返回数组的元素总数：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">numberOfPreviewItemsInPreviewController</span><span class="params">(controller: QLPreviewController)</span></span> -&gt; <span class="type">Int</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> fileURLs.<span class="built_in">count</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第二个方法指定了存在于 <code>fileURLs</code> 数组里的哪个文件会被预览：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">previewController</span><span class="params">(controller: QLPreviewController, previewItemAtIndex index: Int)</span></span> -&gt; <span class="type">QLPreviewItem</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> fileURLs[index]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据官方文档，上面这个方法返回的 <code>QLPreviewItem</code> 类型(实际上是协议)将这个方法定义为了 NSURL 类的 category 了，因此，我们才可以返回数组中的 NSURL 对象(简单起见，将 NSURL 和 QLPreviewItem 视为是相同的)。你可能觉得 <code>QLPreviewItem</code> 协议中支持的方法很有用，那你也可以在<a href="https://developer.apple.com/library/ios/documentation/Quartz/Reference/QLPreviewItem_Protocol/index.html" target="_blank" rel="noopener">这里</a>看看如何自定义 <code>QLPreviewItem</code> 对象。</p>
+<p>以上两个方法在你每次使用 <code>QLPreviewControllerDataSource</code> 时候都是必须的。请一定要确保 Quick Look Preview Controller 需要预览的文件总数与作为 datasource 的数组元素总数相同，否则你回遇到访问数组越界的问题的。</p>
+<p>我们还有最后一步不能忘记：那就是必须将该类设置为 <code>quickLookController</code> 对象的 datasource。在 <code>viewDidLoad()</code> 方法中，添加如下代码：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">viewDidLoad</span><span class="params">()</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line"> </span><br><span class="line">    quickLookController.dataSource = <span class="keyword">self</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="预览文档"><a href="#预览文档" class="headerlink" title="预览文档"></a>预览文档</h2><p>我们已经设置好了 Quick Look Preview Controller 的 datasource 并实现了两个相关的方法，是时候让我们的 demo 应用响应点击并预览选中的文档了。因此，我们需要实现如下的 tableview 的方法：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">tableView</span><span class="params">(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)</span></span> &#123;</span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>你需要一直记着一个基本且简单的规则，就是确保你想预览的文档能被 Quick Look framework 打开。<code>QLPreviewController</code> 类提供了一个叫 <code>canPreviewItem(:)</code> 的类方法来解决这个问题。该方法返回一个 <code>Bool</code> 值，且当返回 <code>true</code> 时，该文档的类型是可以被预览的，否则文档是不能打开的。毫无疑问，你应该在该方法返回 <code>true</code> 时，才继续执行接下来的预览操作。</p>
+<p>如果你按照我之前说的将数组下标做了对应的话，<code>quickLookController</code> 对象有一个叫 <code>currentPreviewItemIndex</code> 的属性可以实现这个用途。虽然在逻辑上很难在这里出错，但是为了确保下标不越界(例子中的是 <code>fileURLs</code> 数组)也值得了，否则你可能会看到你的应用奔溃。我可以说这是最重要的部分，告诉 Quick Look Preview Controller 应该打开哪个文档。</p>
+<p>最后，肯定要将 Quick Look Preview Controller 显示出来的。有两个方案可以实现：一种是以模态的形式，另一种是以 navigation 压栈的形式(前提是要有 navigation controller)。两种方式都会在下面展示。</p>
+<p>原理已经在上面讲清楚了，接下来让我们来码代码吧。下面有三行代码：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">tableView</span><span class="params">(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="type">QLPreviewController</span>.canPreviewItem(fileURLs[indexPath.row]) &#123;</span><br><span class="line">        quickLookController.currentPreviewItemIndex = indexPath.row</span><br><span class="line">        navigationController?.pushViewController(quickLookController, animated: <span class="literal">true</span>)</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>正如你看到，我们首先要确保点击的文档是可以被打开的(在这个 demo 应用中我们事先是知道所有的文档都能被打开，但是这个判断的操作还是必要的，尤其从服务器获取一个文件而不确定它的类型时)。接着，我们指定了需要打开的文档在数组中对应的下标，最后我们将 <code>quickLookController</code> 压入 navigation 的栈里。换种方式，我们也可以通过下面的代码来以模态的形式显示：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">presentViewController(quickLookController, animated: <span class="literal">true</span>, completion: <span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
+<p>如果你现在运行 demo 的话，你点击某行就会看到对应文档的预览效果了。</p>
+<center><br><img src="http://www.appcoda.com/wp-content/uploads/2016/04/t51_2_document_preview.png" alt=""><br></center>
+
+<h2 id="Quick-Look-Preview-Controller-提供的其他特性"><a href="#Quick-Look-Preview-Controller-提供的其他特性" class="headerlink" title="Quick Look Preview Controller 提供的其他特性"></a>Quick Look Preview Controller 提供的其他特性</h2><p>可能你已经注意到了，Quick Look Preview Controller 底部有个 <em>toolbar</em>，其中有两个按钮。左边的按钮允许你通过 <code>UIActivityViewController</code> 发送并分享当前预览的文档。</p>
+<center><br><img src="http://www.appcoda.com/wp-content/uploads/2016/04/t51_3_activity_view.png" alt=""><br></center>
+
+<p>活动控制器中可用的共享选项的数量和种类是不定的，它取决于设备上运行的应用程序（一般模拟器上提供的选项比真机要少）和登录的社交网络，但是不管是什么，你都可以使用左侧导航按钮无延迟地立即发送或共享要被预览的文档。</p>
+<p>右侧第二个 bar button item 呈现了一个模态 view controller，用来展示 datasource 中所有可用的 documents 列表。</p>
+<center><br><img src="http://www.appcoda.com/wp-content/uploads/2016/04/t51_4_switch_document.png" alt=""><br></center>
+
+<p>该按钮可看做是一个快捷键，这样切换不同的文档时就可以不用退出预览界面了。此功能可以方便用户直接的查看所有文档的预览，而没必要退回到原来的视图控制器。</p>
+<h2 id="Quick-Look-Preview-Controller-Delegate"><a href="#Quick-Look-Preview-Controller-Delegate" class="headerlink" title="Quick Look Preview Controller Delegate"></a>Quick Look Preview Controller Delegate</h2><p>除了强制地接受了 <code>QLPreviewControllerDataSource</code> 协议并实现了其中的两个必须实现的方法，你也可以遵守 <code>QLPreviewControllerDelegate</code> 协议并实现该协议来更好地控制 Quick Look Preview Controller。值得注意的是，这里协议里的方法都是可选实现的，也就是说不实现，应用也能正常运行。然而，我们可以在本教程中做一些扩展。</p>
+<p>第一步当然是接受 <code>QLPreviewControllerDelegate</code> 协议，所以你需要修改 <code>FileListViewController.swift</code> 文件中的相应部分如下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FileListViewController</span>: <span class="title">UIViewController</span>, <span class="title">UITableViewDelegate</span>, <span class="title">UITableViewDataSource</span>, <span class="title">QLPreviewControllerDataSource</span>, <span class="title">QLPreviewControllerDelegate</span></span></span><br></pre></td></tr></table></figure>
+<p>具体需要的方法可以根据你的需求来添加。该代理中提供的方法可以在<a href="https://developer.apple.com/library/ios/documentation/NetworkingInternet/Reference/QLPreviewControllerDelegate_Protocol/index.html" target="_blank" rel="noopener">官方文档</a>里查到。我们会介绍其中的一部分。</p>
+<p>在我们接受这个协议后，很重要的一步就是将类和代理链接起来，因此我们在 <code>viewDidLoad()</code> 方法中添加如下代码：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">viewDidLoad</span><span class="params">()</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line"> </span><br><span class="line">    quickLookController.delegate = <span class="keyword">self</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们会用两个其中的方法来展示，这两个方法是在 preview controller 将要退出时被 Quick Look framework 调用的。实际上，一个是在退出前调用的，另一个在退出后调用的。我们会在 demo 中实现这两个方法，并在控制台中简单地打印一些语句表示应用执行到了这里。先从第一个开始吧：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">previewControllerWillDismiss</span><span class="params">(controller: QLPreviewController)</span></span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"The Preview Controller will be dismissed."</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第二个代理方法中会将之前选中的单元行进行取消选中，另外还会在控制台打印一条消息。该方法会在 preview controller 退出后触发。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">previewControllerDidDismiss</span><span class="params">(controller: QLPreviewController)</span></span> &#123;</span><br><span class="line">    tblFileList.deselectRowAtIndexPath(tblFileList.indexPathForSelectedRow!, animated: <span class="literal">true</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"The Preview Controller has been dismissed."</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在运行这个应用，你可以验证刚才写的那些功能是否有实现。</p>
+<p>对于 Quick Look Preview Controller 来说，提供文件的链接也使很正常的。当这种情况发生的时候，你可能需要链接能有效地打开，也可能并不想打开对应链接的文件。接下来的代理方法就用在这里，在这个方法里可以很好地避免某些 URL 打开。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">previewController</span><span class="params">(controller: QLPreviewController, shouldOpenURL url: NSURL, forPreviewItem item: QLPreviewItem)</span></span> -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> item <span class="keyword">as</span>! <span class="type">NSURL</span> == fileURLs[<span class="number">0</span>] &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"Will not open URL \(url.absoluteString)"</span>)</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上这个方法中，我们除了第一种 URL 外，其他都不允许打开(<code>return false</code>)。如果链接指向的 URL 是 PDF 文档(第一种 URL)的话，就允许打开并返回 true。再次运行应用，首先点击 PDF 文档，再点击 Word  文档。观察一下有什么区别。你会发现 Word 文档的链接是不能打开的，而 PDF 文档是可以在 Safari 中打开的。</p>
+<p>（译者注：QLPreviewControllerDelegate 中这个方法是在预览中尝试打开某个链接时才会调用的，意思是说你要先预览某个文件，然后你点了预览文件中的某个链接，此时才会在链接跳转前调用这个方法来判断是否可以打开。）</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>终于到文章的最后，我想我们应该都能赞同 Quick Look framework 是 iOS SDK 中最简单的框架之一了。通过它可以很简单地实现文档预览的功能，如果有其他特殊的需求还可以利用可选的代理方法来实现。依我看来，Quick Look framework 和 Quick Look Preview Controller 针对需要处理文档的应用来说是一个很好的工具。如果你打算将 Quick Look framework 运用到你的应用中的话，那本文希望可以让你下定决心使用它。如果你没这个打算的话，那本文也会让你考虑一下。</p>
+<p>你可以在 Github 上下载<a href="https://github.com/appcoda/QuickLookDemo" target="_blank" rel="noopener">完整的工程</a>作为参考（译者注：以上 Github 并没有完成后的整个工程，如果需要的话，可以去译者的 Github 上，也就是<a href="https://github.com/LinusLing/LNCodeSet/tree/master/QuickLookDemo/QuickLookDemoFinal" target="_blank" rel="noopener">这里</a>下载。）。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/05/05/quick-look-framework/">使用 Quick Look Framework 快速预览文档</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">小铁匠Linus</a></p>
+        <p><span>发布时间:</span>2016-05-05, 13:58:19</p>
+        <p><span>最后更新:</span>2019-08-02, 16:09:56</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/05/05/quick-look-framework/" title="使用 Quick Look Framework 快速预览文档">http://linusling.com/2016/05/05/quick-look-framework/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://linusling.com/2016/05/05/quick-look-framework/　　作者: 小铁匠Linus" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2016/07/01/brief-summary-of-this-half-year/">
+                    2016 半半年总结之工具篇
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/03/23/method-swizzling-in-ios/">
+                    Runtime 之 Method Swizzling
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#关于-demo-APP"><span class="toc-number">1.</span> <span class="toc-text">关于 demo APP</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件以及文件的-URL"><span class="toc-number">2.</span> <span class="toc-text">文件以及文件的 URL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#展示文件"><span class="toc-number">3.</span> <span class="toc-text">展示文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Quick-Look-Preview-Controller-Datasource"><span class="toc-number">4.</span> <span class="toc-text">Quick Look Preview Controller Datasource</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#预览文档"><span class="toc-number">5.</span> <span class="toc-text">预览文档</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Quick-Look-Preview-Controller-提供的其他特性"><span class="toc-number">6.</span> <span class="toc-text">Quick Look Preview Controller 提供的其他特性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Quick-Look-Preview-Controller-Delegate"><span class="toc-number">7.</span> <span class="toc-text">Quick Look Preview Controller Delegate</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"使用 Quick Look Framework 快速预览文档　| 小铁匠的 Swift 之路　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.3.4/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "hLFWbqB3d8Daceub0wVqAMtg-gzGzoHsz",
+        app_key: "NbtIrp00zfplsDqRgU2i3JDD",
+        placeholder: "Just 评论一下",
+        avatar: "retro"
+      });
+    </script>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/07/01/brief-summary-of-this-half-year/" title="上一篇: 2016 半半年总结之工具篇">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2016/03/23/method-swizzling-in-ios/" title="下一篇: Runtime 之 Method Swizzling">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/08/01/application-of-crawler-and-automation-on-mp/">爬虫与自动化在微信公众号发布文章上的应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/01/summary-of-2018/">2018 年终总结与展望</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/01/02/summary-of-2017/">2017 年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/ios-terminators/">终结者 Terminators</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/28/insights-shell/">真知棒系列之 Shell</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/07/18/insights-git/">真知棒系列之 Git</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/06/06/insights-sql/">真知棒系列之 SQL</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/08/ios-performance-center/">HXPerformanceCenter 性能平台的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/09/dependency-injection-and-typhoon/">依赖注入与Typhoon</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/21/rebase-versus-merge/">Rebase VS Merge</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/summary-of-2016/">2016 年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/reloaddata-and-contentsize/">reloadData 与准确获取 contentSize</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/17/statistics-of-method-time-consuming-in-ios/">全局方法耗时统计之 hook 踩坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/12/shell-programming-for-hangzhou-car-lottery-part1/">Shell 编程之杭州摇号查询（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/01/brief-summary-of-interface-testing/">接口测试小结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/01/brief-summary-of-this-half-year/">2016 半半年总结之工具篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/quick-look-framework/">使用 Quick Look Framework 快速预览文档</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/23/method-swizzling-in-ios/">Runtime 之 Method Swizzling</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/17/tools-for-appicon-and-image-resizing/">AppIcon 生成及图片尺寸更改的利器</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/09/deploy-hexo-using-applescript/">使用 AppleScript 制作自动脚本发布 Hexo</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/04/images-in-hexo-using-qiniu/">使用七牛在 Hexo 文档中嵌入图片</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/git-ignorecase-in-hexo/">Git 文件名大小写的踩坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/02/how-to-build-a-blog-with-hexo/">快速构建基于 Hexo 和 Github 的个人网站</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/08/03/convert-in-swift/">String 与 Int、Double 互相转换的方法及 Error Condition Test</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+<script>
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+            </div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2019 小铁匠Linus
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

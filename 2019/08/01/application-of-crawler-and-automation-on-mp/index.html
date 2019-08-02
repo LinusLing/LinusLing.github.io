@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="小铁匠Linus">
+
+
+
+<meta name="description" content="最近利用闲暇空余时间，尝试将一个想法落地，进而形成一款产品。这个想法是，将微信公众号的发布文章尽可能的自动化；期间也对涉及到的爬虫、自动化进行了思考和发散性实践，一并记录一下。">
+<meta name="keywords" content="爬虫,自动化,微信公众号">
+<meta property="og:type" content="article">
+<meta property="og:title" content="爬虫与自动化在微信公众号发布文章上的应用">
+<meta property="og:url" content="http://linusling.com/2019/08/01/application-of-crawler-and-automation-on-mp/index.html">
+<meta property="og:site_name" content="小铁匠的 Swift 之路">
+<meta property="og:description" content="最近利用闲暇空余时间，尝试将一个想法落地，进而形成一款产品。这个想法是，将微信公众号的发布文章尽可能的自动化；期间也对涉及到的爬虫、自动化进行了思考和发散性实践，一并记录一下。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://linusling.com/images/flow1.png">
+<meta property="og:image" content="http://linusling.com/images/flow2.png">
+<meta property="og:image" content="http://linusling.com/images/flow3.png">
+<meta property="og:updated_time" content="2019-08-02T09:10:42.368Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="爬虫与自动化在微信公众号发布文章上的应用">
+<meta name="twitter:description" content="最近利用闲暇空余时间，尝试将一个想法落地，进而形成一款产品。这个想法是，将微信公众号的发布文章尽可能的自动化；期间也对涉及到的爬虫、自动化进行了思考和发散性实践，一并记录一下。">
+<meta name="twitter:image" content="http://linusling.com/images/flow1.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="小铁匠的 Swift 之路" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>爬虫与自动化在微信公众号发布文章上的应用 | 小铁匠的 Swift 之路</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?4078fac10f15218bdccb385562d6f888";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">小铁匠Linus</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">Coder, Swift</p>
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页 | Home</a></li>
+                        
+                            <li><a href="/archives">归档 | Archives</a></li>
+                        
+                            <li><a href="/about">简介 | About</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto://linus@swift.gg" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/linusling/" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/LinusLing/" title="GitHub"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/2016/">2016</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2017/">2017</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2018/">2018</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AppleScript/">AppleScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cocoapods/">Cocoapods</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Convert/">Convert</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/QuickLook/">QuickLook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime/">Runtime</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SQL/">SQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shell/">Shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swizzling/">Swizzling</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Time-Consuming/">Time-Consuming</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Typhoon/">Typhoon</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UICollectionView/">UICollectionView</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/contentSize/">contentSize</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/reloadData/">reloadData</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/七牛/">七牛</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/依赖注入/">依赖注入</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/全栈/">全栈</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/崩溃解析/">崩溃解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/微信公众号/">微信公众号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能平台/">性能平台</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/接口测试/">接口测试</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/收藏/">收藏</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动化/">自动化</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://swift.gg/">SwiftGG</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://www.saitjr.com/">Saitjr</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://blog.dianqk.org/">靛青K</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://daizi.me">小袋子</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://www.swiftyper.com">小锅</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://alanmelody.com">JackAlan</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://numbbbbb.com">numbbbbb</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">Be the change you want to see.    From:小铁匠Linus</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">小铁匠Linus</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">小铁匠Linus</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">Coder, Swift</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页 | Home</a></li>
+                
+                    <li><a href="/archives">归档 | Archives</a></li>
+                
+                    <li><a href="/about">简介 | About</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto://linus@swift.gg" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/linusling/" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/LinusLing/" title="GitHub"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-application-of-crawler-and-automation-on-mp" class="article article-type-post" itemscope="" itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/08/01/application-of-crawler-and-automation-on-mp/" class="article-date">
+      <time datetime="2019-08-01T14:39:05.000Z" itemprop="datePublished">2019-08-01</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      爬虫与自动化在微信公众号发布文章上的应用
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/Blog/">Blog</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/微信公众号/">微信公众号</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自动化/">自动化</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>最近利用闲暇空余时间，尝试将一个想法落地，进而形成一款产品。这个想法是，将微信公众号的发布文章尽可能的自动化；期间也对涉及到的爬虫、自动化进行了思考和发散性实践，一并记录一下。</p>
+<a id="more"></a>
+<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>微信公众号作为微信中相当大的流量载体，我们何不利用关键字搜索将长尾的小流量利用起来呢？那么，细化到实际的需求就是：在某一块领域，不断每天发布相关文章，吸引到通过关键字搜索而来的用户流量实现原始积累。这里暂不考虑搜索关键字优化等，先快速迭代，敏捷起来。</p>
+<h2 id="从问题抽象到需求具象"><a href="#从问题抽象到需求具象" class="headerlink" title="从问题抽象到需求具象"></a>从问题抽象到需求具象</h2><p>一般来说，微信公众号的文章发布主要是作者通过以下步骤完成：</p>
+<div align="center"><br><img src="/images/flow1.png" alt="flow1"><br></div>
+
+<p>可以将该过程抽象为：</p>
+<div align="center"><br><img src="/images/flow2.png" alt="flow2"><br></div>
+
+<p>具体的技术实现方式归纳如下：</p>
+<div align="center"><br><img src="/images/flow3.png" alt="flow3"><br></div>
+
+
+<h2 id="数据爬虫"><a href="#数据爬虫" class="headerlink" title="数据爬虫"></a>数据爬虫</h2><p>爬虫作为一种获取数据的方式，涉及的面还是很广的，结合实际使用和了解的情况，做了如下的归纳。</p>
+<ol>
+<li><p>两种攻防场景</p>
+<ul>
+<li>JS 注入/接口层面可以搞定的数据<ul>
+<li>静态页面为主</li>
+<li>从源代码/接口角度出发，一旦改版需要人工介入</li>
+</ul>
+</li>
+<li>页面层面才能搞定的数据<ul>
+<li>动态页面为主（大趋势）</li>
+<li>Appium/Puppeteer 等工具较重，比较耗时</li>
+<li>支持可视化，可基于截图进行图像识别后获取数据</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>具体涉及的工具</p>
+<ul>
+<li>正则匹配：繁琐低效，门槛不高</li>
+<li>BeautifulSoup/lxml：强大的元素解析器</li>
+</ul>
+</li>
+<li><p>爬虫策略</p>
+<ul>
+<li>广度优先</li>
+<li>深度优先</li>
+<li>两者结合的特定策略</li>
+</ul>
+</li>
+<li><p>反爬虫对抗（高频爬虫必备）</p>
+<ul>
+<li><a href="https://github.com/topics/proxy-pool" target="_blank" rel="noopener">代理池</a></li>
+<li><a href="https://github.com/hellysmile/fake-useragent" target="_blank" rel="noopener">fake-ua</a></li>
+<li>Cookie 管理</li>
+<li>验证码识别 Captcha</li>
+</ul>
+</li>
+<li><p>数据的结构化/持久化</p>
+<ul>
+<li>写文件</li>
+<li>存数据库</li>
+</ul>
+</li>
+<li><p>爬虫框架 Scrapy</p>
+</li>
+</ol>
+<h2 id="生成符合格式的文本-排版编辑器"><a href="#生成符合格式的文本-排版编辑器" class="headerlink" title="生成符合格式的文本-排版编辑器"></a>生成符合格式的文本-排版编辑器</h2><p>在完成“收集数据”后，需要将文本处理成符合的格式。比如，实现微信公众号排版编辑器的功能，可转换 Markdown 到微信特制的 HTML。</p>
+<ul>
+<li>文本拼接处理</li>
+<li>Markdown化</li>
+<li><a href="https://github.com/LinusLing/wechat-format-cli" target="_blank" rel="noopener">微信公众号排版编辑器（命令行版）</a></li>
+</ul>
+<h2 id="自动化"><a href="#自动化" class="headerlink" title="自动化"></a>自动化</h2><p>顾名思义，自动化就是将繁琐的重复性操作简化。在自动化这一块，主要实践了两款比较知名的工具：Appium 和 Puppeteer。</p>
+<ul>
+<li><a href="https://github.com/appium/appium" target="_blank" rel="noopener">Appium</a></li>
+</ul>
+<p>主要用于 App 端自动化测试（自动跑批验证主流程），当然也能利用其自动化特性获取数据（需对截图进行二次加工处理）。例如：从“同花顺”线上 App 中获取上证 A50 每只股票的 K 线图。</p>
+<ul>
+<li><a href="https://github.com/GoogleChrome/puppeteer" target="_blank" rel="noopener">Puppeteer</a></li>
+</ul>
+<p>Google 维护的基于 Chromium 的开发自动化工具，主要用于动态网页页面的自动化测试。例如：在微信公众号官网完成<a href="https://github.com/LinusLing/WeChatMediaPlatformAutomation" target="_blank" rel="noopener">自动发布文章的工具</a>就是基于 Puppeteer 实现的。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>从一个实际需求出发，对整个实现流程进行了梳理和具象。将需求分解成一些较小的问题，并通过<code>输入 -&gt; 处理 -&gt; 输出</code>的方法论进行解决。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/08/01/application-of-crawler-and-automation-on-mp/">爬虫与自动化在微信公众号发布文章上的应用</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">小铁匠Linus</a></p>
+        <p><span>发布时间:</span>2019-08-01, 22:39:05</p>
+        <p><span>最后更新:</span>2019-08-02, 17:10:42</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/08/01/application-of-crawler-and-automation-on-mp/" title="爬虫与自动化在微信公众号发布文章上的应用">http://linusling.com/2019/08/01/application-of-crawler-and-automation-on-mp/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://linusling.com/2019/08/01/application-of-crawler-and-automation-on-mp/　　作者: 小铁匠Linus" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/02/01/summary-of-2018/">
+                    2018 年终总结与展望
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#缘起"><span class="toc-number">1.</span> <span class="toc-text">缘起</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#从问题抽象到需求具象"><span class="toc-number">2.</span> <span class="toc-text">从问题抽象到需求具象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#数据爬虫"><span class="toc-number">3.</span> <span class="toc-text">数据爬虫</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#生成符合格式的文本-排版编辑器"><span class="toc-number">4.</span> <span class="toc-text">生成符合格式的文本-排版编辑器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自动化"><span class="toc-number">5.</span> <span class="toc-text">自动化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#结语"><span class="toc-number">6.</span> <span class="toc-text">结语</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"爬虫与自动化在微信公众号发布文章上的应用　| 小铁匠的 Swift 之路　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.3.4/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "hLFWbqB3d8Daceub0wVqAMtg-gzGzoHsz",
+        app_key: "NbtIrp00zfplsDqRgU2i3JDD",
+        placeholder: "Just 评论一下",
+        avatar: "retro"
+      });
+    </script>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/02/01/summary-of-2018/" title="下一篇: 2018 年终总结与展望">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/08/01/application-of-crawler-and-automation-on-mp/">爬虫与自动化在微信公众号发布文章上的应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/01/summary-of-2018/">2018 年终总结与展望</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/01/02/summary-of-2017/">2017 年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/ios-terminators/">终结者 Terminators</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/28/insights-shell/">真知棒系列之 Shell</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/07/18/insights-git/">真知棒系列之 Git</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/06/06/insights-sql/">真知棒系列之 SQL</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/08/ios-performance-center/">HXPerformanceCenter 性能平台的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/09/dependency-injection-and-typhoon/">依赖注入与Typhoon</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/21/rebase-versus-merge/">Rebase VS Merge</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/summary-of-2016/">2016 年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/reloaddata-and-contentsize/">reloadData 与准确获取 contentSize</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/17/statistics-of-method-time-consuming-in-ios/">全局方法耗时统计之 hook 踩坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/12/shell-programming-for-hangzhou-car-lottery-part1/">Shell 编程之杭州摇号查询（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/01/brief-summary-of-interface-testing/">接口测试小结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/01/brief-summary-of-this-half-year/">2016 半半年总结之工具篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/quick-look-framework/">使用 Quick Look Framework 快速预览文档</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/23/method-swizzling-in-ios/">Runtime 之 Method Swizzling</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/17/tools-for-appicon-and-image-resizing/">AppIcon 生成及图片尺寸更改的利器</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/09/deploy-hexo-using-applescript/">使用 AppleScript 制作自动脚本发布 Hexo</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/04/images-in-hexo-using-qiniu/">使用七牛在 Hexo 文档中嵌入图片</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/git-ignorecase-in-hexo/">Git 文件名大小写的踩坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/02/how-to-build-a-blog-with-hexo/">快速构建基于 Hexo 和 Github 的个人网站</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/08/03/convert-in-swift/">String 与 Int、Double 互相转换的方法及 Error Condition Test</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+<script>
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+            </div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2019 小铁匠Linus
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

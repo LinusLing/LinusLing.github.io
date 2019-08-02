@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="小铁匠Linus">
+
+
+
+<meta name="description" content="最近翻译了一篇关于在 Swift 中使用 Method Swizzling 的文章（SwiftGG 传送门），对比 Objective-C 还是发现有很多的不同之处，写下来算是那篇英文原文的扩展，顺便写了两个小 demo 来演示（Github 传送门）">
+<meta name="keywords" content="Runtime,Swizzling">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Runtime 之 Method Swizzling">
+<meta property="og:url" content="http://linusling.com/2016/03/23/method-swizzling-in-ios/index.html">
+<meta property="og:site_name" content="小铁匠的 Swift 之路">
+<meta property="og:description" content="最近翻译了一篇关于在 Swift 中使用 Method Swizzling 的文章（SwiftGG 传送门），对比 Objective-C 还是发现有很多的不同之处，写下来算是那篇英文原文的扩展，顺便写了两个小 demo 来演示（Github 传送门）">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://linusling.com/images/RuntimeProcess.png">
+<meta property="og:image" content="http://swift.gg/img/articles/effective-method-swizzling-with-swift/swizzling.png1459213818.9107738">
+<meta property="og:updated_time" content="2019-08-02T08:09:56.036Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Runtime 之 Method Swizzling">
+<meta name="twitter:description" content="最近翻译了一篇关于在 Swift 中使用 Method Swizzling 的文章（SwiftGG 传送门），对比 Objective-C 还是发现有很多的不同之处，写下来算是那篇英文原文的扩展，顺便写了两个小 demo 来演示（Github 传送门）">
+<meta name="twitter:image" content="http://linusling.com/images/RuntimeProcess.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="小铁匠的 Swift 之路" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Runtime 之 Method Swizzling | 小铁匠的 Swift 之路</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?4078fac10f15218bdccb385562d6f888";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">小铁匠Linus</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">Coder, Swift</p>
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页 | Home</a></li>
+                        
+                            <li><a href="/archives">归档 | Archives</a></li>
+                        
+                            <li><a href="/about">简介 | About</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto://linus@swift.gg" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/linusling/" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/LinusLing/" title="GitHub"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/2016/">2016</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2017/">2017</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2018/">2018</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AppleScript/">AppleScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cocoapods/">Cocoapods</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Convert/">Convert</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/QuickLook/">QuickLook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime/">Runtime</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SQL/">SQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shell/">Shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swizzling/">Swizzling</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Time-Consuming/">Time-Consuming</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Typhoon/">Typhoon</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UICollectionView/">UICollectionView</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/contentSize/">contentSize</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/reloadData/">reloadData</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/七牛/">七牛</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/依赖注入/">依赖注入</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/全栈/">全栈</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/崩溃解析/">崩溃解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/微信公众号/">微信公众号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能平台/">性能平台</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/接口测试/">接口测试</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/收藏/">收藏</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动化/">自动化</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://swift.gg/">SwiftGG</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://www.saitjr.com/">Saitjr</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://blog.dianqk.org/">靛青K</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://daizi.me">小袋子</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://www.swiftyper.com">小锅</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://alanmelody.com">JackAlan</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://numbbbbb.com">numbbbbb</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">Be the change you want to see.    From:小铁匠Linus</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">小铁匠Linus</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">小铁匠Linus</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">Coder, Swift</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页 | Home</a></li>
+                
+                    <li><a href="/archives">归档 | Archives</a></li>
+                
+                    <li><a href="/about">简介 | About</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto://linus@swift.gg" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/linusling/" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/LinusLing/" title="GitHub"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-method-swizzling-in-ios" class="article article-type-post" itemscope="" itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/03/23/method-swizzling-in-ios/" class="article-date">
+      <time datetime="2016-03-23T01:19:58.000Z" itemprop="datePublished">2016-03-23</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Runtime 之 Method Swizzling
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/iOS/">iOS</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Runtime/">Runtime</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Swizzling/">Swizzling</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>最近翻译了一篇关于在 Swift 中使用 Method Swizzling 的文章（<a href="http://swift.gg/2016/03/29/effective-method-swizzling-with-swift/" target="_blank" rel="noopener">SwiftGG 传送门</a>），对比 Objective-C 还是发现有很多的不同之处，写下来算是那篇英文原文的扩展，顺便写了两个小 demo 来演示（<a href="https://github.com/LinusLing/RuntimeTest" target="_blank" rel="noopener">Github 传送门</a>）</p>
+<a id="more"></a>
+<h2 id="Runtime-消息机制简介"><a href="#Runtime-消息机制简介" class="headerlink" title="Runtime 消息机制简介"></a>Runtime 消息机制简介</h2><p>要说清楚 Method Swizzling 是怎么回事，就要从 Objective-C 的 Runtime 说起。</p>
+<p>Objective-C 中调用方法都是动态实现的，也就是说只有在程序运行到当前调用处时才确定到底执行哪个方法，并不是编译时确定的。而方法是通过发送消息（或消息转发，另说）来执行的，具体过程以语句</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[object doIT:<span class="string">@"Hello World!"</span>];</span><br></pre></td></tr></table></figure>
+<p>来说明：</p>
+<p>毫无疑问，<code>object</code> 是对象，<code>doIT:</code> 是具体的方法名。而 Runtime 时上述代码会转化成：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">objc_msgSend(object, <span class="keyword">@selector</span>(doIT:), <span class="string">@"Hello World!"</span>);</span><br></pre></td></tr></table></figure>
+<p>顾名思义，语句的大致意思是：给 <code>object</code> 对象发送（<code>objc_msgSend</code>）一个 <code>@selector(doIT:)</code> 的消息，参数为字符串 <code>@&quot;Hello World!&quot;</code> 。</p>
+<p><code>object</code> 对象是如何找到这个 <code>@selector(doIT:)</code> 然后发送消息的呢？</p>
+<p>首先，需要说明一下，所有类都继承自 <code>NSObject</code>，而实例对象的类类型是 <code>Class</code>，在 <code>Class</code> 的定义中有 <code>isa</code>（一个指向该对象的指针）、<code>methodLists</code>（一个存储对象方法或类方法的列表）等。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> objc_class &#123;</span><br><span class="line">    Class isa  OBJC_ISA_AVAILABILITY;</span><br><span class="line"></span><br><span class="line"><span class="meta">#if !__OBJC2__</span></span><br><span class="line">    Class super_class                                        OBJC2_UNAVAILABLE;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *name                                         OBJC2_UNAVAILABLE;</span><br><span class="line">    <span class="keyword">long</span> version                                             OBJC2_UNAVAILABLE;</span><br><span class="line">    <span class="keyword">long</span> info                                                OBJC2_UNAVAILABLE;</span><br><span class="line">    <span class="keyword">long</span> instance_size                                       OBJC2_UNAVAILABLE;</span><br><span class="line">    <span class="keyword">struct</span> objc_ivar_list *ivars                             OBJC2_UNAVAILABLE;</span><br><span class="line">    <span class="keyword">struct</span> objc_method_list **methodLists                    OBJC2_UNAVAILABLE;</span><br><span class="line">    <span class="keyword">struct</span> objc_cache *cache                                 OBJC2_UNAVAILABLE;</span><br><span class="line">    <span class="keyword">struct</span> objc_protocol_list *protocols                     OBJC2_UNAVAILABLE;</span><br><span class="line"><span class="meta">#endif</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>objc_msgSend</code> 通过 <code>object</code> 对象的 <code>isa</code> 指针找到对应的类，再通过 <code>SEL</code> 方法选择器（即 <code>@selector(doIT)</code>，同时每个方法对应着一个不能重名的 SEL）中的方法名（<code>doIT:</code>）在对象的 <code>methodLists</code> 中找到对应的方法。</p>
+<p>然而，方法真正的实现是由 <code>IMP</code>（Implementation）来执行消息的具体代码。其中，<code>IMP</code> 是一个函数指针，这个被指向的函数包含一个接收消息的对象 id（self 指针），调用对应的方法选择器 <code>SEL</code> (方法名)，以及不定个数的方法参数，并返回一个 id。</p>
+<p>简单地给这个消息发送过程画了个图，没有画其中 cache 的机制，将就着看吧。</p>
+<p><img src="/images/RuntimeProcess.png" alt="Runtime消息发送过程"></p>
+<p>其中，一个类维护一个运行时可接收的消息分发表；分发表中的每个入口是一个方法(<code>Method</code>，图中红色)，其中 key 是一个特定名称，即选择器(<code>SEL</code>，图中绿色)，其对应一个实现(<code>IMP</code>，图中粉色)，即指向底层C函数的指针。</p>
+<p>OK，到了这里，一般正常的流程就走完了，对应对象的方法也执行了。</p>
+<h2 id="Objective-C-中的-Method-Swizzling"><a href="#Objective-C-中的-Method-Swizzling" class="headerlink" title="Objective-C 中的 Method Swizzling"></a>Objective-C 中的 Method Swizzling</h2><p>Method Swizzling 通过改变特定 selector（方法）与实际实现（<code>IMP</code>）的映射，可以将一个方法的实现在 <em>Runtime</em> 时替换成其它的方法实现。</p>
+<p><img src="http://swift.gg/img/articles/effective-method-swizzling-with-swift/swizzling.png1459213818.9107738" alt=""></p>
+<h3 id="使用场景："><a href="#使用场景：" class="headerlink" title="使用场景："></a>使用场景：</h3><ol>
+<li><p>不愿意复制粘帖，而破坏代码干净整洁</p>
+</li>
+<li><p>不愿意为了加一点小功能，而搬出继承或类别</p>
+</li>
+</ol>
+<p>当然，Method Swizzling 也是一把双刃剑，它也有它的危险，可以看看 StackOverflow 上的讨论（<a href="http://stackoverflow.com/questions/5339276/what-are-the-dangers-of-method-swizzling-in-objective-c" target="_blank" rel="noopener">StackOverflow 传送门</a>）。</p>
+<h3 id="用-Objective-C-举个栗子"><a href="#用-Objective-C-举个栗子" class="headerlink" title="用 Objective-C 举个栗子"></a>用 Objective-C 举个栗子</h3><p>打开任何 ViewController 时，都可以实现日志记录或者统计打点的功能。我写的 Objective-C 版小 demo，真的很小（<a href="https://github.com/LinusLing/RuntimeTest/tree/master/SwizzlingTestOC" target="_blank" rel="noopener">Github 传送门</a>）。</p>
+<ol>
+<li>新建工程 blabla。</li>
+<li>新建 m 文件，输入文件名（如”Swizzling”），File Type 选择 Category，Class 选择 UIViewController。</li>
+<li>成功创建 <code>UIViewController+Swizzling.h</code> 和 <code>UIViewController+Swizzling.m</code>。</li>
+<li>在 <code>UIViewController+Swizzling.m</code> 中输入如下代码：</li>
+</ol>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="meta-string">"UIViewController+Swizzling.h"</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;objc/runtime.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">UIViewController</span> (<span class="title">Swizzling</span>)</span></span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">void</span>)load &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">dispatch_once_t</span> onceToken;</span><br><span class="line">    <span class="built_in">dispatch_once</span>(&amp;onceToken, ^&#123;</span><br><span class="line">        Class <span class="keyword">class</span> = [<span class="keyword">self</span> <span class="keyword">class</span>];</span><br><span class="line">        </span><br><span class="line">        SEL originalSelector = <span class="keyword">@selector</span>(viewDidAppear:);</span><br><span class="line">        SEL swizzledSelector = <span class="keyword">@selector</span>(swizzledViewDidAppear:);</span><br><span class="line">        </span><br><span class="line">        Method originalMethod = class_getInstanceMethod(<span class="keyword">class</span>, originalSelector);</span><br><span class="line">        Method swizzledMethod = class_getInstanceMethod(<span class="keyword">class</span>, swizzledSelector);</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">BOOL</span> didAddedMethod = class_addMethod(<span class="keyword">class</span>, originalSelector, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod));</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"%@"</span>,didAddedMethod?<span class="string">@"YES"</span>:<span class="string">@"NO"</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (didAddedMethod) &#123;</span><br><span class="line">            class_replaceMethod(<span class="keyword">class</span>, originalSelector, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod));</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            method_exchangeImplementations(originalMethod, swizzledMethod);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)swizzledViewDidAppear:(<span class="built_in">BOOL</span>)animated &#123;</span><br><span class="line">    [<span class="keyword">self</span> swizzledViewDidAppear:animated];</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"View Controller: %@ did appear animated: %@"</span>, <span class="built_in">NSStringFromClass</span>([<span class="keyword">self</span> <span class="keyword">class</span>]), animated?<span class="string">@"YES"</span>:<span class="string">@"NO"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>在任何 UIViewController 中就都会执行我们在 <code>swizzledViewDidAppear:</code> 方法中的相关操作了。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)viewDidAppear:(<span class="built_in">BOOL</span>)animated &#123;</span><br><span class="line">    [<span class="keyword">super</span> viewDidAppear:animated];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Swift-中的-Method-Swizzling"><a href="#Swift-中的-Method-Swizzling" class="headerlink" title="Swift 中的 Method Swizzling"></a>Swift 中的 Method Swizzling</h2><p>要在 Swift 自定义类中使用 Method Swizzling 有两个必要条件：</p>
+<ol>
+<li><p>包含 Swizzle 方法的类需要继承自 NSObject</p>
+</li>
+<li><p>需要 Swizzle 的方法必须有动态属性（dynamic attribute）</p>
+</li>
+</ol>
+<p>注：对于 Swift 的自定义类，因为默认并没有使用 Objective-C 运行时，因此也没有动态派发的方法列表，所以如果要 Swizzle 的是 Swift 类型的方法的话，是需要将原方法和替换方法都加上 dynamic 标记，以指明它们需要使用动态派发机制。当然类也要继承自 NSObject。</p>
+<p>再注：下面这个例子使用了 Objective-C 的动态派发，对于 NSObject 的子类（UIViewController）是可以直接使用的，并不是 Swift 中自定义的类，因此没有加 dynamic 标记也是可以的。</p>
+<h3 id="用-Swift-举同一个栗子"><a href="#用-Swift-举同一个栗子" class="headerlink" title="用 Swift 举同一个栗子"></a>用 Swift 举同一个栗子</h3><p>同样地，打开任何 ViewController 时，都可以实现日志记录或者统计打点的功能。我写的 Swift 版小 demo，真的真的很小（<a href="https://github.com/LinusLing/RuntimeTest/tree/master/SwizzlingTestSwift" target="_blank" rel="noopener">Github 传送门</a>）。</p>
+<ol>
+<li>新建工程 blabla。</li>
+<li>新建 Swift 文件，输入文件名（如”Swizzling”）。</li>
+<li>成功创建 <code>Swizzling.swift</code>。</li>
+<li>在 <code>Swizzling.swift</code> 中输入如下代码：</li>
+</ol>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> UIKit</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">UIViewController</span> </span>&#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> <span class="title">initialize</span><span class="params">()</span></span> &#123;</span><br><span class="line">        </span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">Static</span> </span>&#123;</span><br><span class="line">            <span class="keyword">static</span> <span class="keyword">var</span> token: dispatch_once_t = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        dispatch_once(&amp;<span class="type">Static</span>.token) &#123;</span><br><span class="line">            <span class="keyword">let</span> originalSelector = <span class="type">Selector</span>(<span class="string">"viewDidAppear:"</span>)</span><br><span class="line">            <span class="keyword">let</span> swizzledSelector = <span class="type">Selector</span>(<span class="string">"swizzledViewDidAppear:"</span>)</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">let</span> originalMethod = class_getInstanceMethod(<span class="keyword">self</span>, originalSelector)</span><br><span class="line">            <span class="keyword">let</span> swizzledMethod = class_getInstanceMethod(<span class="keyword">self</span>, swizzledSelector)</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">let</span> didAddMethod:<span class="type">Bool</span> = class_addMethod(<span class="keyword">self</span>, originalSelector, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod))</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> didAddMethod &#123;</span><br><span class="line">                class_replaceMethod(<span class="keyword">self</span>, swizzledSelector, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod))</span><br><span class="line">            &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                method_exchangeImplementations(originalMethod, swizzledMethod)</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">swizzledViewDidAppear</span><span class="params">(animated: Bool)</span></span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.swizzledViewDidAppear(animated)</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"View Controller: \(self) did appear animated: \(animated)"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>同样地，在任何 UIViewController 中就都会执行我们在 <code>swizzledViewDidAppear</code> 方法中的相关操作了。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">viewDidAppear</span><span class="params">(animated: Bool)</span></span> &#123;</span><br><span class="line">    <span class="keyword">super</span>.viewDidAppear(animated)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Method-Swizzling-中-Objective-C-与-Swift-的异同"><a href="#Method-Swizzling-中-Objective-C-与-Swift-的异同" class="headerlink" title="Method Swizzling 中 Objective-C 与 Swift 的异同"></a>Method Swizzling 中 Objective-C 与 Swift 的异同</h2><p>我打算用 Markdown 中比较累人的表格来玩一下，顺便踩踩格式上的坑。</p>
+<table>
+<thead>
+<tr>
+<th>区别</th>
+<th style="text-align:center">Objective-C</th>
+<th style="text-align:center">Swift</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Runtime 头文件</td>
+<td style="text-align:center"><code>#import &lt;objc/runtime.h&gt;</code></td>
+<td style="text-align:center">不需要</td>
+</tr>
+<tr>
+<td>Swizzling 调用处</td>
+<td style="text-align:center"><code>load</code> 方法</td>
+<td style="text-align:center"><code>initialize</code>  方法</td>
+</tr>
+<tr>
+<td>语法</td>
+<td style="text-align:center">Objective-C</td>
+<td style="text-align:center">Swift</td>
+</tr>
+</tbody>
+</table>
+<p>注：<code>load</code> 方法只在 Objective-C 里有，而且不能在 Swift 里重载，不管怎么试都会报编译错误。接下来执行 Swizzle 最好的地方就是 <code>initialize</code> 了，这是调用第一个方法前的地方。</p>
+<h3 id="在-dispatch-once-中执行"><a href="#在-dispatch-once-中执行" class="headerlink" title="在 dispatch_once 中执行"></a>在 dispatch_once 中执行</h3><p>因为 Swizzling 会改变全局状态，所以我们需要在运行时采取一些预防措施。GCD 的<code>dispatch_once</code> 可以保证操作的原子性，确保代码只被执行一次，不管有多少个线程。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/03/23/method-swizzling-in-ios/">Runtime 之 Method Swizzling</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">小铁匠Linus</a></p>
+        <p><span>发布时间:</span>2016-03-23, 09:19:58</p>
+        <p><span>最后更新:</span>2019-08-02, 16:09:56</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/03/23/method-swizzling-in-ios/" title="Runtime 之 Method Swizzling">http://linusling.com/2016/03/23/method-swizzling-in-ios/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://linusling.com/2016/03/23/method-swizzling-in-ios/　　作者: 小铁匠Linus" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2016/05/05/quick-look-framework/">
+                    使用 Quick Look Framework 快速预览文档
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/03/17/tools-for-appicon-and-image-resizing/">
+                    AppIcon 生成及图片尺寸更改的利器
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Runtime-消息机制简介"><span class="toc-number">1.</span> <span class="toc-text">Runtime 消息机制简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Objective-C-中的-Method-Swizzling"><span class="toc-number">2.</span> <span class="toc-text">Objective-C 中的 Method Swizzling</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#使用场景："><span class="toc-number">2.1.</span> <span class="toc-text">使用场景：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#用-Objective-C-举个栗子"><span class="toc-number">2.2.</span> <span class="toc-text">用 Objective-C 举个栗子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Swift-中的-Method-Swizzling"><span class="toc-number">3.</span> <span class="toc-text">Swift 中的 Method Swizzling</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#用-Swift-举同一个栗子"><span class="toc-number">3.1.</span> <span class="toc-text">用 Swift 举同一个栗子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Method-Swizzling-中-Objective-C-与-Swift-的异同"><span class="toc-number">4.</span> <span class="toc-text">Method Swizzling 中 Objective-C 与 Swift 的异同</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#在-dispatch-once-中执行"><span class="toc-number">4.1.</span> <span class="toc-text">在 dispatch_once 中执行</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"Runtime 之 Method Swizzling　| 小铁匠的 Swift 之路　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.3.4/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "hLFWbqB3d8Daceub0wVqAMtg-gzGzoHsz",
+        app_key: "NbtIrp00zfplsDqRgU2i3JDD",
+        placeholder: "Just 评论一下",
+        avatar: "retro"
+      });
+    </script>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/05/05/quick-look-framework/" title="上一篇: 使用 Quick Look Framework 快速预览文档">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2016/03/17/tools-for-appicon-and-image-resizing/" title="下一篇: AppIcon 生成及图片尺寸更改的利器">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/08/01/application-of-crawler-and-automation-on-mp/">爬虫与自动化在微信公众号发布文章上的应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/01/summary-of-2018/">2018 年终总结与展望</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/01/02/summary-of-2017/">2017 年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/ios-terminators/">终结者 Terminators</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/28/insights-shell/">真知棒系列之 Shell</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/07/18/insights-git/">真知棒系列之 Git</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/06/06/insights-sql/">真知棒系列之 SQL</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/08/ios-performance-center/">HXPerformanceCenter 性能平台的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/09/dependency-injection-and-typhoon/">依赖注入与Typhoon</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/21/rebase-versus-merge/">Rebase VS Merge</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/summary-of-2016/">2016 年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/reloaddata-and-contentsize/">reloadData 与准确获取 contentSize</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/17/statistics-of-method-time-consuming-in-ios/">全局方法耗时统计之 hook 踩坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/12/shell-programming-for-hangzhou-car-lottery-part1/">Shell 编程之杭州摇号查询（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/01/brief-summary-of-interface-testing/">接口测试小结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/01/brief-summary-of-this-half-year/">2016 半半年总结之工具篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/quick-look-framework/">使用 Quick Look Framework 快速预览文档</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/23/method-swizzling-in-ios/">Runtime 之 Method Swizzling</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/17/tools-for-appicon-and-image-resizing/">AppIcon 生成及图片尺寸更改的利器</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/09/deploy-hexo-using-applescript/">使用 AppleScript 制作自动脚本发布 Hexo</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/04/images-in-hexo-using-qiniu/">使用七牛在 Hexo 文档中嵌入图片</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/git-ignorecase-in-hexo/">Git 文件名大小写的踩坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/02/how-to-build-a-blog-with-hexo/">快速构建基于 Hexo 和 Github 的个人网站</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/08/03/convert-in-swift/">String 与 Int、Double 互相转换的方法及 Error Condition Test</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+<script>
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+            </div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2019 小铁匠Linus
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

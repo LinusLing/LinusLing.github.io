@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="小铁匠Linus">
+
+
+
+<meta name="description" content="由于域名备案前，年轻地买了阿里云的云虚拟主机，然后想想换成云服务器 ECS 成本有点高啊（帮主大大梁杰同学安利了一波云服务器是如何自由度高、如何 ssh 上去操作、如何 cron 定时，然而说白了我穷啊＝。＝）。那就只能曲线救国，既然没有服务器也不能在服务器上设置定时任务，那就只能在本地搞一个自动脚本来降低每次操作的成本了，Mac OSX 上就来试试 AppleScript 咯。">
+<meta name="keywords" content="Hexo,AppleScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 AppleScript 制作自动脚本发布 Hexo">
+<meta property="og:url" content="http://linusling.com/2016/03/09/deploy-hexo-using-applescript/index.html">
+<meta property="og:site_name" content="小铁匠的 Swift 之路">
+<meta property="og:description" content="由于域名备案前，年轻地买了阿里云的云虚拟主机，然后想想换成云服务器 ECS 成本有点高啊（帮主大大梁杰同学安利了一波云服务器是如何自由度高、如何 ssh 上去操作、如何 cron 定时，然而说白了我穷啊＝。＝）。那就只能曲线救国，既然没有服务器也不能在服务器上设置定时任务，那就只能在本地搞一个自动脚本来降低每次操作的成本了，Mac OSX 上就来试试 AppleScript 咯。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://linusling.com/images/applescriptsketch.png">
+<meta property="og:updated_time" content="2019-08-02T08:09:56.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 AppleScript 制作自动脚本发布 Hexo">
+<meta name="twitter:description" content="由于域名备案前，年轻地买了阿里云的云虚拟主机，然后想想换成云服务器 ECS 成本有点高啊（帮主大大梁杰同学安利了一波云服务器是如何自由度高、如何 ssh 上去操作、如何 cron 定时，然而说白了我穷啊＝。＝）。那就只能曲线救国，既然没有服务器也不能在服务器上设置定时任务，那就只能在本地搞一个自动脚本来降低每次操作的成本了，Mac OSX 上就来试试 AppleScript 咯。">
+<meta name="twitter:image" content="http://linusling.com/images/applescriptsketch.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="小铁匠的 Swift 之路" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>使用 AppleScript 制作自动脚本发布 Hexo | 小铁匠的 Swift 之路</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?4078fac10f15218bdccb385562d6f888";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">小铁匠Linus</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">Coder, Swift</p>
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页 | Home</a></li>
+                        
+                            <li><a href="/archives">归档 | Archives</a></li>
+                        
+                            <li><a href="/about">简介 | About</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto://linus@swift.gg" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/linusling/" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/LinusLing/" title="GitHub"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/2016/">2016</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2017/">2017</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2018/">2018</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AppleScript/">AppleScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cocoapods/">Cocoapods</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Convert/">Convert</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/QuickLook/">QuickLook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime/">Runtime</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SQL/">SQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shell/">Shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swizzling/">Swizzling</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Time-Consuming/">Time-Consuming</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Typhoon/">Typhoon</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UICollectionView/">UICollectionView</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/contentSize/">contentSize</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/reloadData/">reloadData</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/七牛/">七牛</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/依赖注入/">依赖注入</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/全栈/">全栈</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/崩溃解析/">崩溃解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/微信公众号/">微信公众号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能平台/">性能平台</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/接口测试/">接口测试</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/收藏/">收藏</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动化/">自动化</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://swift.gg/">SwiftGG</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://www.saitjr.com/">Saitjr</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://blog.dianqk.org/">靛青K</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://daizi.me">小袋子</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://www.swiftyper.com">小锅</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://alanmelody.com">JackAlan</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://numbbbbb.com">numbbbbb</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">Be the change you want to see.    From:小铁匠Linus</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">小铁匠Linus</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">小铁匠Linus</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">Coder, Swift</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页 | Home</a></li>
+                
+                    <li><a href="/archives">归档 | Archives</a></li>
+                
+                    <li><a href="/about">简介 | About</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto://linus@swift.gg" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/linusling/" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/LinusLing/" title="GitHub"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-deploy-hexo-using-applescript" class="article article-type-post" itemscope="" itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/03/09/deploy-hexo-using-applescript/" class="article-date">
+      <time datetime="2016-03-09T15:13:22.000Z" itemprop="datePublished">2016-03-09</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      使用 AppleScript 制作自动脚本发布 Hexo
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/Blog/">Blog</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AppleScript/">AppleScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Hexo/">Hexo</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>由于域名备案前，年轻地买了阿里云的云虚拟主机，然后想想换成云服务器 ECS 成本有点高啊（<a href="http://weibo.com/numbbbbb" target="_blank" rel="noopener">帮主大大梁杰同学</a>安利了一波云服务器是如何自由度高、如何 ssh 上去操作、如何 cron 定时，然而说白了我穷啊＝。＝）。那就只能曲线救国，既然没有服务器也不能在服务器上设置定时任务，那就只能在本地搞一个自动脚本来降低每次操作的成本了，Mac OSX 上就来试试 AppleScript 咯。</p>
+<a id="more"></a>
+<h2 id="半自动化的-Hexo-方案"><a href="#半自动化的-Hexo-方案" class="headerlink" title="半自动化的 Hexo 方案"></a>半自动化的 Hexo 方案</h2><ol>
+<li><p>由于阿里云的云虚拟主机只能用 FTP 上传网站，那就在本地开一个 FTP 定时上传 Hexo 网站的 public 文件夹到虚拟主机（LINUX 操作系统上传到 <code>/htdocs</code> 目录，Windows 操作系统上传到根目录）。</p>
+</li>
+<li><p>Hexo 的添加文章以及发布操作可以使用 AppleScript 写的脚本来自动完成。</p>
+</li>
+</ol>
+<h2 id="FTP-定时上传"><a href="#FTP-定时上传" class="headerlink" title="FTP 定时上传"></a>FTP 定时上传</h2><p>找到一款开源的 FTP 工具：<a href="http://ftpbox.org/" target="_blank" rel="noopener"><code>FTPbox</code></a>。</p>
+<p>它有这些功能是我这边比较看中的：</p>
+<ol>
+<li><p>FTP 上传（最基本的功能了）</p>
+</li>
+<li><p>FTP 选择性同步的功能（过滤一些 <code>logreport</code> 和 <code>report</code> 等对于 Hexo 无用的文件夹，且能避免因同步方向没设置对而导致同步错乱的情况）</p>
+</li>
+<li><p>可以设置同步的方向（我只需要将本地 public 文件夹里的所有文件上传即可，故选择 <code>local to remote only</code> 模式）</p>
+</li>
+<li><p>可以设置同步的周期（类似于服务器端的 cron 任务）</p>
+</li>
+</ol>
+<p>缺点很明显，还不算致命吧：</p>
+<p>目前只有 Windows 版本！！！</p>
+<p>Mac OSX Coming soon… </p>
+<h2 id="AppleScript-脚本"><a href="#AppleScript-脚本" class="headerlink" title="AppleScript 脚本"></a>AppleScript 脚本</h2><h3 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h3><p>AppleScript 是 Mac OS X 内置的一种功能强大的脚本语言，可以使用 AppleScript 把一些重复繁琐并且耗费时间的任务自动化，比如，我们需要创建一篇 Hexo 的新文章时，需要如下步骤：</p>
+<ol>
+<li>在终端中将当前目录改变到 Hexo 所在的根目录</li>
+<li>执行 <code>hexo new &quot;对应的文章名称&quot;</code> 创建对应的文章</li>
+</ol>
+<p>又比如，我们写完文章后，需要发布 Hexo ，需要如下步骤：</p>
+<ol>
+<li>在终端中将当前目录改变到 Hexo 所在的根目录</li>
+<li>执行 <code>hexo clean</code> 清除缓存，避免有些小改动不能提交</li>
+<li>执行 <code>hexo d -g</code> 这一组合命令，生成并部署 Hexo，此时静态的网站就在 public 文件夹里了。</li>
+</ol>
+<p>从上面两个例子中，不难看出重复或者部分重复的部分。</p>
+<h3 id="经过"><a href="#经过" class="headerlink" title="经过"></a>经过</h3><p>经过一番搜索，找到了一个用 AppleScript 脚本来新建 Hexo 文章的代码，在<a href="https://gist.github.com/lmm214/f3533cb091e43af83957" target="_blank" rel="noopener">这里</a>，它将 Octopress 版本的脚本转成 Hexo 的了。为我这个新手提供了一个很好的参考，方便我快速仿写 AppleScript 脚本。</p>
+<p>我用系统自带的<code>脚本编辑器</code>把其中的路径和 MarkDown 软件替换成自己的，添加注释并暴力地去掉了一些判断，把代码贴在下面了，也把代码段放在<a href="https://github.com/LinusLing/LNCodeSet" target="_blank" rel="noopener">我的 Github</a> 上了，再次感谢修改者 林木木 的这篇<a href="https://immmmm.com/hexo-new-post-applescript.html" target="_blank" rel="noopener">博客</a>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">-- 告诉 &quot;Finder&quot; 做好准备</span><br><span class="line">tell application &quot;Finder&quot;</span><br><span class="line">	-- 启动当前应用</span><br><span class="line">	activate</span><br><span class="line">	-- 显示 dialog ，提示信息：&quot;填入文章标题&quot; 默认填充：&quot;title&quot;</span><br><span class="line">	display dialog &quot;填入文章标题&quot; default answer &quot;title&quot;</span><br><span class="line">	-- 将输入的文本赋值给 postTitle 作为标题并返回</span><br><span class="line">	set postTitle to text returned of result as text</span><br><span class="line">end tell</span><br><span class="line">-- 告诉 &quot;Terminal&quot; 做好准备</span><br><span class="line">tell application &quot;Terminal&quot;</span><br><span class="line">	-- 启动当前应用</span><br><span class="line">	activate</span><br><span class="line">	-- 判断当前是否有窗口打开</span><br><span class="line">	if (count of windows) is 0 then</span><br><span class="line">		-- 没有的话，告诉 &quot;System Events&quot; 做好准备</span><br><span class="line">		tell application &quot;System Events&quot;</span><br><span class="line">			-- 模拟按键 Command + N 新建一个窗口</span><br><span class="line">			keystroke &quot;n&quot; using &#123;command down&#125;</span><br><span class="line">		end tell</span><br><span class="line">	else</span><br><span class="line">		activate</span><br><span class="line">	end if</span><br><span class="line">	-- 暴力设置第一个窗口作为接下来要执行操作的窗口</span><br><span class="line">	set win to window [0]</span><br><span class="line">	-- 设置当前的 Tab</span><br><span class="line">	set currentTab to selected tab of win</span><br><span class="line">	-- 在当前 Tab 中执行改变目录的操作（需修改到自己的 Hexo 所在路径）</span><br><span class="line">	do script &quot;cd /Users/linus/hexo&quot; in currentTab</span><br><span class="line">	-- 执行创建新文章的操作，传入之前输入的标题作为参数</span><br><span class="line">	do script &quot;hexo new &quot; &amp; postTitle in currentTab</span><br><span class="line">	-- 延迟一秒</span><br><span class="line">	delay 1</span><br><span class="line">	-- 设置用 MacDown 打开对应路径的 md 文件</span><br><span class="line">	do script &quot;open -a MacDown source/_posts/&quot; &amp; postTitle &amp; &quot;.md&quot; in currentTab</span><br><span class="line">end tell</span><br></pre></td></tr></table></figure>
+<p>接下来就是依样画葫芦的改成发布 Hexo 的功能，相比之前需要文章名的变量，现在的更加简单。思路就是之前描述的过程，把它写成 AppleScript 版本即可，直接上代码吧，导师快要找我讨论了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">-- 告诉 &quot;Terminal&quot; 做好准备</span><br><span class="line">tell application &quot;Terminal&quot;</span><br><span class="line">	-- 启动当前应用</span><br><span class="line">	activate</span><br><span class="line">	-- 暴力设置第一个窗口作为接下来要执行操作的窗口</span><br><span class="line">	set win to window [0]</span><br><span class="line">	-- 设置当前的 Tab</span><br><span class="line">	set currentTab to selected tab of win</span><br><span class="line">	-- 在当前 Tab 中执行改变目录的操作（需修改到自己的 Hexo 所在路径）</span><br><span class="line">	do script &quot;cd /Users/linus/hexo&quot; in currentTab</span><br><span class="line">	-- 执行清除缓存的操作</span><br><span class="line">	do script &quot;hexo clean &quot; in currentTab</span><br><span class="line">	-- 延迟一秒</span><br><span class="line">	delay 1</span><br><span class="line">	-- 执行生成并发布 Hexo 的操作</span><br><span class="line">	do script &quot;hexo d -g &quot; in currentTab</span><br><span class="line">end tell</span><br></pre></td></tr></table></figure>
+<h3 id="收尾"><a href="#收尾" class="headerlink" title="收尾"></a>收尾</h3><p>将每个 AppleScript 脚本保存成<code>脚本</code>文件格式，后缀为<code>.scpt</code>，也就是我上传到 Github 的版本，便于之后修改；再将文件保存为<code>应用程序</code>格式，后缀为<code>.app</code>，也就是可以执行的应用程序了。</p>
+<p>PS：<br>另存为<code>应用程序</code>格式时，不要勾选<code>运行处理程序后保持打开</code>，不然下一次要执行脚本的时候还要关闭再打开，就让它执行完脚本自己关闭吧。</p>
+<p>PSS：<br>另存为<code>应用程序</code>格式后，图标都是一样，看起来多不爽，马上去学习如何修改应用程序的图标，随意搞了两张图，难看是难看了点，至少从图标上区分功能了吧。随意感受下。</p>
+<p><img src="/images/applescriptsketch.png" alt="AppleScript示意图"></p>
+<h3 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h3><p>使用 AppleScript 脚本创建 md 文件时，发现输入带有空格的文件名会导致终端无法识别的问题，通用的解决方案是将空格替换成其他符号，如<code>-</code>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-- 将 postTitle 变量中的空格替换成 <span class="string">"-"</span> </span><br><span class="line"><span class="keyword">set</span> &#123;tid, <span class="type">AppleScript's</span> text item delimiters&#125; to &#123;<span class="type">AppleScript's</span> text item delimiters, <span class="string">" "</span>&#125;</span><br><span class="line"><span class="keyword">set</span> temp to text items of postTitle</span><br><span class="line"><span class="keyword">set</span> <span class="type">AppleScript's</span> text item delimiters to <span class="string">"-"</span></span><br><span class="line"><span class="keyword">set</span> postTitle to temp <span class="keyword">as</span> text</span><br><span class="line"><span class="keyword">set</span> <span class="type">AppleScript's</span> text item delimiters to tid</span><br></pre></td></tr></table></figure>
+<p>完整的脚本代码可以到<a href="https://github.com/LinusLing/LNCodeSet" target="_blank" rel="noopener">我的 Github</a> 上查看或下载。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/03/09/deploy-hexo-using-applescript/">使用 AppleScript 制作自动脚本发布 Hexo</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">小铁匠Linus</a></p>
+        <p><span>发布时间:</span>2016-03-09, 23:13:22</p>
+        <p><span>最后更新:</span>2019-08-02, 16:09:56</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/03/09/deploy-hexo-using-applescript/" title="使用 AppleScript 制作自动脚本发布 Hexo">http://linusling.com/2016/03/09/deploy-hexo-using-applescript/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://linusling.com/2016/03/09/deploy-hexo-using-applescript/　　作者: 小铁匠Linus" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2016/03/17/tools-for-appicon-and-image-resizing/">
+                    AppIcon 生成及图片尺寸更改的利器
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/03/04/images-in-hexo-using-qiniu/">
+                    使用七牛在 Hexo 文档中嵌入图片
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#半自动化的-Hexo-方案"><span class="toc-number">1.</span> <span class="toc-text">半自动化的 Hexo 方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FTP-定时上传"><span class="toc-number">2.</span> <span class="toc-text">FTP 定时上传</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AppleScript-脚本"><span class="toc-number">3.</span> <span class="toc-text">AppleScript 脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#起因"><span class="toc-number">3.1.</span> <span class="toc-text">起因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#经过"><span class="toc-number">3.2.</span> <span class="toc-text">经过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#收尾"><span class="toc-number">3.3.</span> <span class="toc-text">收尾</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#更新"><span class="toc-number">3.4.</span> <span class="toc-text">更新</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"使用 AppleScript 制作自动脚本发布 Hexo　| 小铁匠的 Swift 之路　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.3.4/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "hLFWbqB3d8Daceub0wVqAMtg-gzGzoHsz",
+        app_key: "NbtIrp00zfplsDqRgU2i3JDD",
+        placeholder: "Just 评论一下",
+        avatar: "retro"
+      });
+    </script>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/03/17/tools-for-appicon-and-image-resizing/" title="上一篇: AppIcon 生成及图片尺寸更改的利器">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2016/03/04/images-in-hexo-using-qiniu/" title="下一篇: 使用七牛在 Hexo 文档中嵌入图片">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/08/01/application-of-crawler-and-automation-on-mp/">爬虫与自动化在微信公众号发布文章上的应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/01/summary-of-2018/">2018 年终总结与展望</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/01/02/summary-of-2017/">2017 年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/ios-terminators/">终结者 Terminators</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/28/insights-shell/">真知棒系列之 Shell</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/07/18/insights-git/">真知棒系列之 Git</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/06/06/insights-sql/">真知棒系列之 SQL</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/08/ios-performance-center/">HXPerformanceCenter 性能平台的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/09/dependency-injection-and-typhoon/">依赖注入与Typhoon</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/21/rebase-versus-merge/">Rebase VS Merge</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/summary-of-2016/">2016 年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/reloaddata-and-contentsize/">reloadData 与准确获取 contentSize</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/17/statistics-of-method-time-consuming-in-ios/">全局方法耗时统计之 hook 踩坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/12/shell-programming-for-hangzhou-car-lottery-part1/">Shell 编程之杭州摇号查询（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/01/brief-summary-of-interface-testing/">接口测试小结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/01/brief-summary-of-this-half-year/">2016 半半年总结之工具篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/quick-look-framework/">使用 Quick Look Framework 快速预览文档</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/23/method-swizzling-in-ios/">Runtime 之 Method Swizzling</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/17/tools-for-appicon-and-image-resizing/">AppIcon 生成及图片尺寸更改的利器</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/09/deploy-hexo-using-applescript/">使用 AppleScript 制作自动脚本发布 Hexo</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/04/images-in-hexo-using-qiniu/">使用七牛在 Hexo 文档中嵌入图片</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/git-ignorecase-in-hexo/">Git 文件名大小写的踩坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/02/how-to-build-a-blog-with-hexo/">快速构建基于 Hexo 和 Github 的个人网站</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/08/03/convert-in-swift/">String 与 Int、Double 互相转换的方法及 Error Condition Test</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+<script>
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+            </div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2019 小铁匠Linus
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
