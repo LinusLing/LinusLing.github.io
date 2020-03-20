@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="小铁匠Linus">
+
+
+
+<meta name="description" content="现在都 0202 年了，如果还是只知道程序是从 main 开始执行，就有点说不过去了。本文会将 iOS 的启动过程做一个梳理，同时也基于启动的原理，对某 App 的启动优化进行了一次实操。">
+<meta name="keywords" content="启动优化,dyld">
+<meta property="og:type" content="article">
+<meta property="og:title" content="迟到但不缺席的 iOS 启动过程以及启动优化">
+<meta property="og:url" content="http://linusling.com/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/index.html">
+<meta property="og:site_name" content="小铁匠的 Swift 之路">
+<meta property="og:description" content="现在都 0202 年了，如果还是只知道程序是从 main 开始执行，就有点说不过去了。本文会将 iOS 的启动过程做一个梳理，同时也基于启动的原理，对某 App 的启动优化进行了一次实操。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://linusling.com/images/dyld2-3.png">
+<meta property="og:image" content="http://linusling.com/images/dyld-detail.png">
+<meta property="og:updated_time" content="2020-03-20T12:10:18.909Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="迟到但不缺席的 iOS 启动过程以及启动优化">
+<meta name="twitter:description" content="现在都 0202 年了，如果还是只知道程序是从 main 开始执行，就有点说不过去了。本文会将 iOS 的启动过程做一个梳理，同时也基于启动的原理，对某 App 的启动优化进行了一次实操。">
+<meta name="twitter:image" content="http://linusling.com/images/dyld2-3.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="小铁匠的 Swift 之路" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>迟到但不缺席的 iOS 启动过程以及启动优化 | 小铁匠的 Swift 之路</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?4078fac10f15218bdccb385562d6f888";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">小铁匠Linus</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">Coder, Swift</p>
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页 | Home</a></li>
+                        
+                            <li><a href="/archives">归档 | Archives</a></li>
+                        
+                            <li><a href="/about">简介 | About</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto://linus@swift.gg" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/linusling/" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/LinusLing/" title="GitHub"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/2016/">2016</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2017/">2017</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2018/">2018</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2019/">2019</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AppleScript/">AppleScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cocoapods/">Cocoapods</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Convert/">Convert</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/QuickLook/">QuickLook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime/">Runtime</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SQL/">SQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shell/">Shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swizzling/">Swizzling</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Time-Consuming/">Time-Consuming</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Typhoon/">Typhoon</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UICollectionView/">UICollectionView</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/contentSize/">contentSize</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dyld/">dyld</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/reloadData/">reloadData</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/七牛/">七牛</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/依赖注入/">依赖注入</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/全栈/">全栈</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/启动优化/">启动优化</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/崩溃解析/">崩溃解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/微信公众号/">微信公众号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能平台/">性能平台</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/接口测试/">接口测试</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/收藏/">收藏</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动化/">自动化</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://swift.gg/">SwiftGG</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://www.saitjr.com/">Saitjr</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://blog.dianqk.org/">靛青K</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://daizi.me">小袋子</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://www.swiftyper.com">小锅</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://alanmelody.com">JackAlan</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://numbbbbb.com">numbbbbb</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">Be the change you want to see.    From:小铁匠Linus</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">小铁匠Linus</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">小铁匠Linus</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">Coder, Swift</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页 | Home</a></li>
+                
+                    <li><a href="/archives">归档 | Archives</a></li>
+                
+                    <li><a href="/about">简介 | About</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto://linus@swift.gg" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/linusling/" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/LinusLing/" title="GitHub"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-how-to-launch-and-optimize-ios-app-startup-time" class="article article-type-post" itemscope="" itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/" class="article-date">
+      <time datetime="2020-03-02T12:10:09.000Z" itemprop="datePublished">2020-03-02</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      迟到但不缺席的 iOS 启动过程以及启动优化
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/iOS/">iOS</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dyld/">dyld</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/启动优化/">启动优化</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>现在都 0202 年了，如果还是只知道程序是从 <code>main</code> 开始执行，就有点说不过去了。本文会将 iOS 的启动过程做一个梳理，同时也基于启动的原理，对某 App 的启动优化进行了一次实操。</p>
+<a id="more"></a>
+<h2 id="App-启动时的蛛丝马迹"><a href="#App-启动时的蛛丝马迹" class="headerlink" title="App 启动时的蛛丝马迹"></a>App 启动时的蛛丝马迹</h2><p>既然有程序从 <code>main</code> 开始执行的认知基础，那就先从 <code>main</code> 函数打个断点开始吧。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0 main</span><br><span class="line">1 start    ======&gt;    libdyld.dylib`start:</span><br></pre></td></tr></table></figure>
+<p>很明显，<code>start</code> 在 <code>main</code> 之前执行。</p>
+<p>再从 <code>+load</code> 方法中断点试试看，因为 iOS 开发都知道 <code>+load</code> 先于 <code>main</code> 函数执行，哈哈。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0 +[ViewController load]</span><br><span class="line">1 load_images</span><br><span class="line">12 _dyld_start    ======&gt;    dyldbootstrap::start(dyld3::MachOLoaded const*, int, char const**, dyld3::MachOLoaded const*, unsigned long*)</span><br></pre></td></tr></table></figure>
+<p>引出关键字 <strong><code>Mach-O</code></strong> 以及 <strong><code>dyld</code></strong> aka <code>dynamic loader</code>，苹果官方已<a href="https://opensource.apple.com/tarballs/dyld/" target="_blank" rel="noopener">开源</a>。</p>
+<h2 id="Mach-O"><a href="#Mach-O" class="headerlink" title="Mach-O"></a>Mach-O</h2><p><code>Mach-O</code> 是 Mach object 的缩写，是 Mac、iOS 上用于存储程序、库的标准格式。</p>
+<table>
+<thead>
+<tr>
+<th>常见类型</th>
+<th>动态链接编辑器</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MH_OBJECT</td>
+<td><code>.o</code>/<code>.a</code></td>
+<td>目标文件/静态库文件</td>
+</tr>
+<tr>
+<td>MH_EXECUTE</td>
+<td><code>.app/xxx</code></td>
+<td>可执行文件</td>
+</tr>
+<tr>
+<td>MH_DYLIB</td>
+<td><code>.dylib</code>/<code>.framework/xxx</code></td>
+<td>动态库文件</td>
+</tr>
+<tr>
+<td>MH_DYLINKER</td>
+<td><code>/usr/lib/dyld</code></td>
+<td>动态链接编辑器</td>
+</tr>
+<tr>
+<td>MH_DSYM</td>
+<td><code>.dSYM/Contents/Resources/DWARF/xxx</code></td>
+<td>二进制文件符号信息（常用于分析APP的崩溃信息）</td>
+</tr>
+</tbody>
+</table>
+<p>它内部结构是怎么样的呢？整合了<a href="https://developer.apple.com/library/archive/documentation/DeveloperTools/Conceptual/MachOTopics/0-Introduction/introduction.html" target="_blank" rel="noopener">官方</a>描述和一些已知的段。</p>
+<table>
+<thead>
+<tr>
+<th>常见类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Header</strong></td>
+<td>指定了该 <code>Mach-O</code> 文件的文件类型、架构、位数、指令数量</td>
+</tr>
+<tr>
+<td><strong>Load commands</strong></td>
+<td>指定了该文件的逻辑结构以及载入虚拟内存后的布局</td>
+</tr>
+<tr>
+<td><strong>Raw segment data</strong> ↓</td>
+<td>Load commands 中定义了的段的具体数据</td>
+</tr>
+<tr>
+<td>__TEXT</td>
+<td>只读数据段，记录了头文件、代码、只读常量等</td>
+</tr>
+<tr>
+<td>__DATA</td>
+<td>读写数据段，全局变量、静态变量等可读写内容的起始位置和偏移量等</td>
+</tr>
+<tr>
+<td>__LINKEDIT</td>
+<td>保存着如何加载该文件的元数据，dyld 需要其中的信息</td>
+</tr>
+</tbody>
+</table>
+<p>注：所有段（segments）都是页（page）的整数倍大小（<code>arm64</code> 上 <code>16KB</code>，其它<code>4KB</code>）</p>
+<p>早前，<code>arm64</code> 刚出时，苹果推出了一种 <code>Mach-O Universal Files</code> 的文件格式。这种文件格式的设计，完美的诠释了 <code>indirection</code> （戏称为“包一层”）。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right"></th>
+<th>如下两行 <code>FAT Header</code> 只为方便画图，实为同一个页</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">↓</td>
+<td><strong>FAT Header</strong></td>
+</tr>
+<tr>
+<td style="text-align:right">↙   ↓</td>
+<td><strong>FAT Header</strong></td>
+</tr>
+<tr>
+<td style="text-align:right">↘   ↓</td>
+<td><strong>Header</strong>（arm64）</td>
+</tr>
+<tr>
+<td style="text-align:right">↓</td>
+<td><strong>Load commands</strong></td>
+</tr>
+<tr>
+<td style="text-align:right">↓</td>
+<td>__TEXT</td>
+</tr>
+<tr>
+<td style="text-align:right">↓</td>
+<td>__DATA</td>
+</tr>
+<tr>
+<td style="text-align:right">↓</td>
+<td>__LINKEDIT</td>
+</tr>
+<tr>
+<td style="text-align:right">→</td>
+<td><strong>Header</strong>（armv7）</td>
+</tr>
+<tr>
+<td style="text-align:right"></td>
+<td><strong>Load commands</strong></td>
+</tr>
+<tr>
+<td style="text-align:right"></td>
+<td>__TEXT</td>
+</tr>
+<tr>
+<td style="text-align:right"></td>
+<td>__DATA</td>
+</tr>
+<tr>
+<td style="text-align:right"></td>
+<td>__LINKEDIT</td>
+</tr>
+</tbody>
+</table>
+<p>注：<code>Fat Header</code> 一个页的大小；且内部列出了所有 <code>Mach-O</code> 文件中的架构和偏移量。</p>
+<h2 id="dyld-加载过程"><a href="#dyld-加载过程" class="headerlink" title="dyld 加载过程"></a>dyld 加载过程</h2><p>准备贴两张图作为索引，加载过程就能了然于胸了。一张是 <a href="https://developer.apple.com/videos/play/wwdc2017/413" target="_blank" rel="noopener">WWDC17-413</a> 中讲到的 <code>dyld</code> 优化，如下图。</p>
+<p><code>dyld 3</code> 主要优化为 <code>进程外解析/编译 Mach-O</code>、<code>进程内读取前阶段结果</code> 和 <code>运行基于缓存的服务</code> 三个环节。特别是 <code>进程外解析/编译 Mach-O</code> 这个环节是提前执行的，可以加快后续环节的速度，从而加快整个程序的启动。</p>
+<p><img src="/images/dyld2-3.png" alt="dyld优化"></p>
+<p>再就是 dyld 加载过程的三个阶段（<code>pre-main</code> -&gt; <code>Runtime Initializer</code> -&gt; <code>main</code>）示意图，可以从每个阶段继续延伸开去很多知识点。</p>
+<p><img src="/images/dyld-detail.png" alt="dyld过程"></p>
+<p>比如：</p>
+<ol>
+<li><code>+load</code> 方法加载顺序</li>
+<li>针对 <code>__attribute__((constructor))</code> 我们能做些什么</li>
+<li>最关键的，我们怎么优化启动的耗时</li>
+</ol>
+<h2 id="启动优化实操"><a href="#启动优化实操" class="headerlink" title="启动优化实操"></a>启动优化实操</h2><p>看过 <a href="https://developer.apple.com/videos/play/wwdc2016/406" target="_blank" rel="noopener">WWDC16-406</a> 的同学肯定知道以下几个优化的要点（是要点，不是必要点）：</p>
+<h3 id="检测启动耗时"><a href="#检测启动耗时" class="headerlink" title="检测启动耗时"></a>检测启动耗时</h3><ol>
+<li><p>对于 <code>pre-main</code> 阶段</p>
+<p>Apple 提供了一种测量方法，在 Xcode 中 <code>Edit scheme -&gt; Run -&gt; Auguments</code> 将环境变量 <code>DYLD_PRINT_STATISTICS</code> 设为 <code>1</code> 或者 <code>DYLD_PRINT_STATISTICS_DETAILS</code> 设为 <code>1</code> （后者展示的内容更细）。</p>
+</li>
+<li><p>对于 <code>main</code> 阶段</p>
+<p>主要是测量main()函数开始执行到didFinishLaunchingWithOptions执行结束的耗时</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CFAbsoluteTime beginTime;</span><br><span class="line">// main() ...</span><br><span class="line"></span><br><span class="line">// Appdelegate.m</span><br><span class="line">// didFinishLaunchingWithOptions ...</span><br><span class="line"></span><br><span class="line">double launchTime = (CFAbsoluteTimeGetCurrent() - StartTime);</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="优化方案之-pre-main"><a href="#优化方案之-pre-main" class="headerlink" title="优化方案之 pre-main"></a>优化方案之 <code>pre-main</code></h3><h4 id="Parse-Image-Map-Image"><a href="#Parse-Image-Map-Image" class="headerlink" title="Parse Image/Map Image"></a>Parse Image/Map Image</h4><ol>
+<li>尽量不使用内嵌（embedded）的dylib，加载内嵌dylib性能开销较大</li>
+<li>合并已有的dylib和使用静态库（static archives），减少dylib的使用个数</li>
+<li>懒加载dylib，但是要注意dlopen()可能造成一些问题，且实际上懒加载做的工作会更多</li>
+</ol>
+<h4 id="Rebase-Image-Bind-Image"><a href="#Rebase-Image-Bind-Image" class="headerlink" title="Rebase Image/Bind Image"></a>Rebase Image/Bind Image</h4><ol>
+<li>减少ObjC类（class）、方法（selector）、分类（category）的数量</li>
+<li>减少C++虚函数的的数量（创建虚函数表有开销）</li>
+<li>使用Swift structs（内部做了优化，符号数量更少）</li>
+</ol>
+<h4 id="Runtime-Initializers"><a href="#Runtime-Initializers" class="headerlink" title="Runtime Initializers"></a>Runtime Initializers</h4><ol>
+<li>少在类的+load方法里做事情，尽量把这些事情推迟到+initiailize</li>
+<li>减少构造器函数个数，在构造器函数里少做些事情</li>
+<li>减少C++静态全局变量的个数</li>
+</ol>
+<h3 id="优化方案之-main"><a href="#优化方案之-main" class="headerlink" title="优化方案之 main"></a>优化方案之 <code>main</code></h3><ol>
+<li>梳理各个二方/三方库，找到可以延迟加载的库，做延迟加载处理，比如放到首页控制器的viewDidAppear方法里。</li>
+<li>梳理业务逻辑，把可以延迟执行的逻辑，做延迟执行处理。比如检查新版本、注册推送通知等逻辑。</li>
+<li>避免复杂/多余的计算。</li>
+<li>避免在首页控制器的viewDidLoad和viewWillAppear做太多事情，这2个方法执行完，首页控制器才能显示，部分可以延迟创建的视图应做延迟创建/懒加载处理。</li>
+<li>采用性能更好的API。</li>
+<li>首页控制器用纯代码方式来构建。</li>
+</ol>
+<h3 id="实践结果"><a href="#实践结果" class="headerlink" title="实践结果"></a>实践结果</h3><h4 id="pre-main阶段"><a href="#pre-main阶段" class="headerlink" title="pre-main阶段"></a><code>pre-main</code>阶段</h4><ol>
+<li>删除无用的文件和库：移除原生的首页 LoanViewController 与设置页 MineViewController、移除视频爬虫的 MMWormhole 与 VideoCrawler</li>
+<li>合并重复的分类 Category：RPToast</li>
+<li><code>+load</code> 方法延迟到 <code>+initiailize</code>（除了主工程，还涉及不少二方、三方库）</li>
+</ol>
+<p>成绩单：<code>850ms -&gt; 760ms</code></p>
+<h4 id="main-阶段"><a href="#main-阶段" class="headerlink" title="main 阶段"></a><code>main</code> 阶段</h4><ol>
+<li>合规相关的变更，刚好可以与启动优化的延迟加载（地理位置、三方登录和数据收集等 SDK）契合</li>
+<li>其余与业务方沟（扯）通（皮）后确认新的先后顺序就不列了</li>
+</ol>
+<p>成绩单：<code>0.41s -&gt; 0.30s</code></p>
+<h3 id="后续规划"><a href="#后续规划" class="headerlink" title="后续规划"></a>后续规划</h3><ol>
+<li>替代部分庞大的库，采用更轻量级的解决方案。</li>
+<li>整理代码，去除重复的实现，避免出现功能重复的类&amp;分类&amp;方法。</li>
+<li>监控好灰度版本启动速度的变化趋势，尽早发现&amp;解决拖慢启动速度的问题。</li>
+<li>将启动优化与用户体验挂钩（活跃、激活和留存等核心指标的角度出发进行衡量）</li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/">迟到但不缺席的 iOS 启动过程以及启动优化</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">小铁匠Linus</a></p>
+        <p><span>发布时间:</span>2020-03-02, 20:10:09</p>
+        <p><span>最后更新:</span>2020-03-20, 20:10:18</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/" title="迟到但不缺席的 iOS 启动过程以及启动优化">http://linusling.com/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://linusling.com/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/　　作者: 小铁匠Linus" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/12/31/summary-of-2019/">
+                    2019 年终总结与展望
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#App-启动时的蛛丝马迹"><span class="toc-number">1.</span> <span class="toc-text">App 启动时的蛛丝马迹</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Mach-O"><span class="toc-number">2.</span> <span class="toc-text">Mach-O</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dyld-加载过程"><span class="toc-number">3.</span> <span class="toc-text">dyld 加载过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#启动优化实操"><span class="toc-number">4.</span> <span class="toc-text">启动优化实操</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#检测启动耗时"><span class="toc-number">4.1.</span> <span class="toc-text">检测启动耗时</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#优化方案之-pre-main"><span class="toc-number">4.2.</span> <span class="toc-text">优化方案之 pre-main</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Parse-Image-Map-Image"><span class="toc-number">4.2.1.</span> <span class="toc-text">Parse Image/Map Image</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Rebase-Image-Bind-Image"><span class="toc-number">4.2.2.</span> <span class="toc-text">Rebase Image/Bind Image</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Runtime-Initializers"><span class="toc-number">4.2.3.</span> <span class="toc-text">Runtime Initializers</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#优化方案之-main"><span class="toc-number">4.3.</span> <span class="toc-text">优化方案之 main</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实践结果"><span class="toc-number">4.4.</span> <span class="toc-text">实践结果</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#pre-main阶段"><span class="toc-number">4.4.1.</span> <span class="toc-text">pre-main阶段</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#main-阶段"><span class="toc-number">4.4.2.</span> <span class="toc-text">main 阶段</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#后续规划"><span class="toc-number">4.5.</span> <span class="toc-text">后续规划</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"迟到但不缺席的 iOS 启动过程以及启动优化　| 小铁匠的 Swift 之路　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.3.4/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "hLFWbqB3d8Daceub0wVqAMtg-gzGzoHsz",
+        app_key: "NbtIrp00zfplsDqRgU2i3JDD",
+        placeholder: "Just 评论一下",
+        avatar: "retro"
+      });
+    </script>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/12/31/summary-of-2019/" title="下一篇: 2019 年终总结与展望">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/">迟到但不缺席的 iOS 启动过程以及启动优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/31/summary-of-2019/">2019 年终总结与展望</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/01/application-of-crawler-and-automation-on-mp/">爬虫与自动化在微信公众号发布文章上的应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/01/summary-of-2018/">2018 年终总结与展望</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/01/02/summary-of-2017/">2017 年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/ios-terminators/">终结者 Terminators</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/28/insights-shell/">真知棒系列之 Shell</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/07/18/insights-git/">真知棒系列之 Git</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/06/06/insights-sql/">真知棒系列之 SQL</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/08/ios-performance-center/">HXPerformanceCenter 性能平台的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/09/dependency-injection-and-typhoon/">依赖注入与Typhoon</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/21/rebase-versus-merge/">Rebase VS Merge</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/summary-of-2016/">2016 年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/reloaddata-and-contentsize/">reloadData 与准确获取 contentSize</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/17/statistics-of-method-time-consuming-in-ios/">全局方法耗时统计之 hook 踩坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/12/shell-programming-for-hangzhou-car-lottery-part1/">Shell 编程之杭州摇号查询（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/01/brief-summary-of-interface-testing/">接口测试小结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/01/brief-summary-of-this-half-year/">2016 半半年总结之工具篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/quick-look-framework/">使用 Quick Look Framework 快速预览文档</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/23/method-swizzling-in-ios/">Runtime 之 Method Swizzling</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/17/tools-for-appicon-and-image-resizing/">AppIcon 生成及图片尺寸更改的利器</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/09/deploy-hexo-using-applescript/">使用 AppleScript 制作自动脚本发布 Hexo</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/04/images-in-hexo-using-qiniu/">使用七牛在 Hexo 文档中嵌入图片</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/git-ignorecase-in-hexo/">Git 文件名大小写的踩坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/02/how-to-build-a-blog-with-hexo/">快速构建基于 Hexo 和 Github 的个人网站</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/08/03/convert-in-swift/">String 与 Int、Double 互相转换的方法及 Error Condition Test</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+<script>
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+            </div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2020 小铁匠Linus
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
