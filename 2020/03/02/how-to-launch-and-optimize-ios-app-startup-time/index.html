@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://linusling.com/images/dyld2-3.png">
 <meta property="og:image" content="http://linusling.com/images/dyld-detail.png">
-<meta property="og:updated_time" content="2020-03-20T12:10:18.909Z">
+<meta property="og:updated_time" content="2020-03-20T12:20:23.276Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="迟到但不缺席的 iOS 启动过程以及启动优化">
 <meta name="twitter:description" content="现在都 0202 年了，如果还是只知道程序是从 main 开始执行，就有点说不过去了。本文会将 iOS 的启动过程做一个梳理，同时也基于启动的原理，对某 App 的启动优化进行了一次实操。">
@@ -481,36 +481,36 @@
 <p>Apple 提供了一种测量方法，在 Xcode 中 <code>Edit scheme -&gt; Run -&gt; Auguments</code> 将环境变量 <code>DYLD_PRINT_STATISTICS</code> 设为 <code>1</code> 或者 <code>DYLD_PRINT_STATISTICS_DETAILS</code> 设为 <code>1</code> （后者展示的内容更细）。</p>
 </li>
 <li><p>对于 <code>main</code> 阶段</p>
-<p>主要是测量main()函数开始执行到didFinishLaunchingWithOptions执行结束的耗时</p>
+<p>主要是测量 <code>main()</code> 函数开始执行到 <code>didFinishLaunchingWithOptions</code> 执行结束的耗时</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CFAbsoluteTime beginTime;</span><br><span class="line">// main() ...</span><br><span class="line"></span><br><span class="line">// Appdelegate.m</span><br><span class="line">// didFinishLaunchingWithOptions ...</span><br><span class="line"></span><br><span class="line">double launchTime = (CFAbsoluteTimeGetCurrent() - StartTime);</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
 <h3 id="优化方案之-pre-main"><a href="#优化方案之-pre-main" class="headerlink" title="优化方案之 pre-main"></a>优化方案之 <code>pre-main</code></h3><h4 id="Parse-Image-Map-Image"><a href="#Parse-Image-Map-Image" class="headerlink" title="Parse Image/Map Image"></a>Parse Image/Map Image</h4><ol>
-<li>尽量不使用内嵌（embedded）的dylib，加载内嵌dylib性能开销较大</li>
-<li>合并已有的dylib和使用静态库（static archives），减少dylib的使用个数</li>
-<li>懒加载dylib，但是要注意dlopen()可能造成一些问题，且实际上懒加载做的工作会更多</li>
+<li>尽量不使用内嵌（embedded）的 dylib，加载内嵌 dylib 性能开销较大</li>
+<li>合并已有的 dylib 和使用静态库（static archives），减少 dylib 的使用个数</li>
+<li>懒加载 dylib，但是要注意 <code>dlopen()</code> 可能造成一些问题，且实际上懒加载做的工作会更多</li>
 </ol>
 <h4 id="Rebase-Image-Bind-Image"><a href="#Rebase-Image-Bind-Image" class="headerlink" title="Rebase Image/Bind Image"></a>Rebase Image/Bind Image</h4><ol>
-<li>减少ObjC类（class）、方法（selector）、分类（category）的数量</li>
-<li>减少C++虚函数的的数量（创建虚函数表有开销）</li>
-<li>使用Swift structs（内部做了优化，符号数量更少）</li>
+<li>减少 ObjC 类（class）、方法（selector）、分类（category）的数量</li>
+<li>减少 C++ 虚函数的的数量（创建虚函数表有开销）</li>
+<li>使用 Swift structs（内部做了优化，符号数量更少）</li>
 </ol>
 <h4 id="Runtime-Initializers"><a href="#Runtime-Initializers" class="headerlink" title="Runtime Initializers"></a>Runtime Initializers</h4><ol>
-<li>少在类的+load方法里做事情，尽量把这些事情推迟到+initiailize</li>
+<li>少在类的 <code>+load</code> 方法里做事情，尽量把这些事情推迟到 <code>+initiailize</code></li>
 <li>减少构造器函数个数，在构造器函数里少做些事情</li>
-<li>减少C++静态全局变量的个数</li>
+<li>减少 C++ 静态全局变量的个数</li>
 </ol>
 <h3 id="优化方案之-main"><a href="#优化方案之-main" class="headerlink" title="优化方案之 main"></a>优化方案之 <code>main</code></h3><ol>
-<li>梳理各个二方/三方库，找到可以延迟加载的库，做延迟加载处理，比如放到首页控制器的viewDidAppear方法里。</li>
+<li>梳理各个二方/三方库，找到可以延迟加载的库，做延迟加载处理，比如放到首页控制器的 <code>viewDidAppear</code> 方法里。</li>
 <li>梳理业务逻辑，把可以延迟执行的逻辑，做延迟执行处理。比如检查新版本、注册推送通知等逻辑。</li>
 <li>避免复杂/多余的计算。</li>
-<li>避免在首页控制器的viewDidLoad和viewWillAppear做太多事情，这2个方法执行完，首页控制器才能显示，部分可以延迟创建的视图应做延迟创建/懒加载处理。</li>
-<li>采用性能更好的API。</li>
+<li>避免在首页控制器的 <code>viewDidLoad</code> 和 <code>viewWillAppear</code> 做太多事情，这 2 个方法执行完，首页控制器才能显示，部分可以延迟创建的视图应做延迟创建/懒加载处理。</li>
+<li>采用性能更好的 API。</li>
 <li>首页控制器用纯代码方式来构建。</li>
 </ol>
 <h3 id="实践结果"><a href="#实践结果" class="headerlink" title="实践结果"></a>实践结果</h3><h4 id="pre-main阶段"><a href="#pre-main阶段" class="headerlink" title="pre-main阶段"></a><code>pre-main</code>阶段</h4><ol>
-<li>删除无用的文件和库：移除原生的首页 LoanViewController 与设置页 MineViewController、移除视频爬虫的 MMWormhole 与 VideoCrawler</li>
-<li>合并重复的分类 Category：RPToast</li>
+<li>删除无用的文件和库：移除原生的首页 <code>LoanViewController</code> 与设置页 <code>MineViewController</code>、移除视频爬虫的 <code>MMWormhole</code> 与 <code>VideoCrawler</code></li>
+<li>合并重复的分类 Category：<code>RPToast</code></li>
 <li><code>+load</code> 方法延迟到 <code>+initiailize</code>（除了主工程，还涉及不少二方、三方库）</li>
 </ol>
 <p>成绩单：<code>850ms -&gt; 760ms</code></p>
@@ -536,7 +536,7 @@
         <p><span>本文标题:</span><a href="/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/">迟到但不缺席的 iOS 启动过程以及启动优化</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">小铁匠Linus</a></p>
         <p><span>发布时间:</span>2020-03-02, 20:10:09</p>
-        <p><span>最后更新:</span>2020-03-20, 20:10:18</p>
+        <p><span>最后更新:</span>2020-03-20, 20:20:23</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/" title="迟到但不缺席的 iOS 启动过程以及启动优化">http://linusling.com/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/</a>
             <span class="copy-path" data-clipboard-text="原文: http://linusling.com/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/　　作者: 小铁匠Linus" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
