@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="小铁匠Linus">
+
+
+
+<meta name="description" content="之前写的2019 年终总结与展望，居然有不少同学认真看了，还有来向我讨教关于数据驱动这方面经验的，故本文会将可以公开说的一些经验分享一下，需要相关图书资料的也可以私下找我。">
+<meta name="keywords" content="AARRR,北极星指标">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AARRR 增长模型的应用">
+<meta property="og:url" content="http://linusling.com/2020/01/20/application-of-AARRR-growth-model/index.html">
+<meta property="og:site_name" content="小铁匠的 Swift 之路">
+<meta property="og:description" content="之前写的2019 年终总结与展望，居然有不少同学认真看了，还有来向我讨教关于数据驱动这方面经验的，故本文会将可以公开说的一些经验分享一下，需要相关图书资料的也可以私下找我。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://i.loli.net/2020/03/26/eHNyPXTcY1K4nrS.png">
+<meta property="og:image" content="https://i.loli.net/2020/03/26/c5kqLNMgBsRhzQp.png">
+<meta property="og:updated_time" content="2020-03-26T03:26:21.543Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AARRR 增长模型的应用">
+<meta name="twitter:description" content="之前写的2019 年终总结与展望，居然有不少同学认真看了，还有来向我讨教关于数据驱动这方面经验的，故本文会将可以公开说的一些经验分享一下，需要相关图书资料的也可以私下找我。">
+<meta name="twitter:image" content="https://i.loli.net/2020/03/26/eHNyPXTcY1K4nrS.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="小铁匠的 Swift 之路" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>AARRR 增长模型的应用 | 小铁匠的 Swift 之路</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?4078fac10f15218bdccb385562d6f888";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">小铁匠Linus</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">Coder, Swift</p>
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页 | Home</a></li>
+                        
+                            <li><a href="/archives">归档 | Archives</a></li>
+                        
+                            <li><a href="/about">简介 | About</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto://linus@swift.gg" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/linusling/" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/LinusLing/" title="GitHub"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/2016/">2016</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2017/">2017</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2018/">2018</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/2019/">2019</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AARRR/">AARRR</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AppleScript/">AppleScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cocoapods/">Cocoapods</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Convert/">Convert</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/QuickLook/">QuickLook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime/">Runtime</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SQL/">SQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shell/">Shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swizzling/">Swizzling</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Time-Consuming/">Time-Consuming</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Typhoon/">Typhoon</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UICollectionView/">UICollectionView</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/contentSize/">contentSize</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dyld/">dyld</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/reloadData/">reloadData</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/七牛/">七牛</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/依赖注入/">依赖注入</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/全栈/">全栈</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/北极星指标/">北极星指标</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/启动优化/">启动优化</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/崩溃解析/">崩溃解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/微信公众号/">微信公众号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能平台/">性能平台</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/接口测试/">接口测试</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/收藏/">收藏</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动化/">自动化</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://swift.gg/">SwiftGG</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://www.saitjr.com/">Saitjr</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://blog.dianqk.org/">靛青K</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://daizi.me">小袋子</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://www.swiftyper.com">小锅</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://alanmelody.com">JackAlan</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://numbbbbb.com">numbbbbb</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">Be the change you want to see.    From:小铁匠Linus</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">小铁匠Linus</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">小铁匠Linus</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">Coder, Swift</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页 | Home</a></li>
+                
+                    <li><a href="/archives">归档 | Archives</a></li>
+                
+                    <li><a href="/about">简介 | About</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto://linus@swift.gg" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/linusling/" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/LinusLing/" title="GitHub"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我">
+</nav>
+      <div class="body-wrap"><article id="post-application-of-AARRR-growth-model" class="article article-type-post" itemscope="" itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2020/01/20/application-of-AARRR-growth-model/" class="article-date">
+      <time datetime="2020-01-20T13:36:09.000Z" itemprop="datePublished">2020-01-20</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      AARRR 增长模型的应用
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/数据驱动/">数据驱动</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AARRR/">AARRR</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/北极星指标/">北极星指标</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>之前写的<a href="https://linusling.com/2019/12/31/summary-of-2019/">2019 年终总结与展望</a>，居然有不少同学认真看了，还有来向我讨教关于数据驱动这方面经验的，故本文会将可以公开说的一些经验分享一下，需要相关图书资料的也可以私下找我。</p>
+<a id="more"></a>
+<h2 id="AARRR-增长漏斗模型概述"><a href="#AARRR-增长漏斗模型概述" class="headerlink" title="AARRR 增长漏斗模型概述"></a>AARRR 增长漏斗模型概述</h2><p>主要应用于社交、电子商务等场景。</p>
+<p>实际上是个<strong>漏斗模型</strong>，每到下一层都会有一定的用户流失。</p>
+<p><img src="https://i.loli.net/2020/03/26/eHNyPXTcY1K4nrS.png" alt="AARRR 增长漏斗模型"></p>
+<h3 id="Acquisition（获客）"><a href="#Acquisition（获客）" class="headerlink" title="Acquisition（获客）"></a>Acquisition（获客）</h3><p><strong>流量入口/渠道</strong>：</p>
+<p>SEO 等、应用市场（App Store、Android 市场等）、落地页（注册页、中间页、全流程等）、信息流（微信朋友圈、抖音等）</p>
+<p><strong>如何提升/优化的思考/入手方向</strong>：</p>
+<p>1、流量最大的渠道？2、流量最有价值（转化）的渠道？3、性价比最高渠道？</p>
+<h3 id="Activation（激活、首次转化）"><a href="#Activation（激活、首次转化）" class="headerlink" title="Activation（激活、首次转化）"></a>Activation（激活、首次转化）</h3><p>即：首次注册后开始使用产品（首次转化）。</p>
+<p>简单、明确为原则，降低产品的使用成本，确保用户认可该产品对其有用；</p>
+<p>一旦用户开始使用产品，就有操作路径（埋点数据）可用于统计/优化。</p>
+<h3 id="Retention（留存）"><a href="#Retention（留存）" class="headerlink" title="Retention（留存）"></a>Retention（留存）</h3><p>老用户的成本比纯新用户低 5-25 倍；</p>
+<p>新客率/流失率 决定产品是在成长还是烧钱；</p>
+<p>DAU/MAU 日活/月活</p>
+<h3 id="Referral（传播、分发）"><a href="#Referral（传播、分发）" class="headerlink" title="Referral（传播、分发）"></a>Referral（传播、分发）</h3><p>即：用户支持、认可该产品。</p>
+<h3 id="Revenue（变现）"><a href="#Revenue（变现）" class="headerlink" title="Revenue（变现）"></a>Revenue（变现）</h3><p>CAC 获客成本、CLV 客户生命周期价值（毛利？）</p>
+<h2 id="AARRR-增长漏斗模型的应用"><a href="#AARRR-增长漏斗模型的应用" class="headerlink" title="AARRR 增长漏斗模型的应用"></a>AARRR 增长漏斗模型的应用</h2><p><strong>关键链路</strong>：注册/登录-&gt;实名认证-&gt;六选一认证-&gt;真实信息/运营商 二项认证-&gt;下单页提单-&gt;订单确认-&gt;审核放款-&gt;贷后/还款…</p>
+<p>（✔️为客户端、前端直接参与、负责，也是 AB 试验的重要应用场景）</p>
+<h3 id="Acquisition（获客）-1"><a href="#Acquisition（获客）-1" class="headerlink" title="Acquisition（获客）"></a>Acquisition（获客）</h3><p>由渠道同学负责。</p>
+<p>目前即刻有已接入的公司应用有：管家、人品贷、即刻有独立 app、给你花；都是以全流程 weex 的方式接入，以统一的 51 账号登录，降低了获客的成本与注册的难度。</p>
+<p>外部渠道有：广告/信息流/贷超；落地页都是以注册页、中间页的形式导流。</p>
+<h3 id="Activation（激活、首次转化）✔️"><a href="#Activation（激活、首次转化）✔️" class="headerlink" title="Activation（激活、首次转化）✔️"></a>Activation（激活、首次转化）✔️</h3><p>1、缩短新用户流程的优化，以促进转化。</p>
+<p>2、实名认证作为第一个必填认证项，其发起/通过率直接影响后续链路，需要长期监控与优化。</p>
+<p>3、真实信息作为提单前最后一个必填认证项，其发起/通过率直接影响后续提单，需要长期监控与优化。</p>
+<p>4、针对满足提单条件的用户，进行提单引导（视觉感官刺激）。</p>
+<p>5、下单页自动填充最高的可用额度，以促进放款量。</p>
+<p>6、下单页提交订单后自动进入人脸识别，缩短用户操作路径，人脸识别完成率提升 8%。</p>
+<h3 id="Retention（留存）✔️"><a href="#Retention（留存）✔️" class="headerlink" title="Retention（留存）✔️"></a>Retention（留存）✔️</h3><p>1、在非关键链路上，引导用户去关键链路变现。</p>
+<p>2、每天多时段的 push、短信召回处于不同阶段的用户（与相关认证、提额活动配合），目前由运营同学负责。</p>
+<h3 id="Referral（传播、分发）✔️"><a href="#Referral（传播、分发）✔️" class="headerlink" title="Referral（传播、分发）✔️"></a>Referral（传播、分发）✔️</h3><p>暂无</p>
+<h3 id="Revenue（变现）-1"><a href="#Revenue（变现）-1" class="headerlink" title="Revenue（变现）"></a>Revenue（变现）</h3><p>由业务同学负责最终的变现达成情况。</p>
+<h2 id="增长计划-北极星指标"><a href="#增长计划-北极星指标" class="headerlink" title="增长计划 - 北极星指标"></a>增长计划 - 北极星指标</h2><p>1、北极星指标：每日放款订单总金额 = ∑ 每日通过订单金额     =》 通过订单数↑ &amp;&amp; 每笔通过订单金额↑ 提单 uv / 日活 uv    订单确认 UV</p>
+<p>2、用户旅程：登录-&gt;实名认证-&gt;六选一认证-&gt;真实信息/运营商 二项认证-&gt;下单页提单-&gt;订单确认 </p>
+<p>3、组装增长模型</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">订单确认 UV = 认证项达到可以提单状态的人数（实名认证完成 &amp;&amp; 六选一完成 &amp;&amp; 二项基础完成） - 未发起提单操作人数 - 提单操作被网关拦截人数 - 下单失败人数 - 订单未确认人数</span><br></pre></td></tr></table></figure>
+<h3 id="实践步骤"><a href="#实践步骤" class="headerlink" title="实践步骤"></a>实践步骤</h3><p><img src="https://i.loli.net/2020/03/26/c5kqLNMgBsRhzQp.png" alt="AB实验步骤"></p>
+<h3 id="推荐资料"><a href="#推荐资料" class="headerlink" title="推荐资料"></a>推荐资料</h3><ol>
+<li><a href="https://mp.weixin.qq.com/s/-MmNvHj_cFet87e50FSd0Q" target="_blank" rel="noopener">思维导图 | 10倍用户增长的方法论，全在这里</a></li>
+<li><a href="https://coffee.pmcaff.com/article/rPLD8n0bLY" target="_blank" rel="noopener">刘玮冬运营手记 | 用户增长的顶级之道：产品全链路增长体系</a></li>
+<li><a href="https://xiaozhuanlan.com/topic/1092657843" target="_blank" rel="noopener">入门增长黑客应该读哪几本书？</a></li>
+<li><a href="https://blog.cnbang.net/tech/3643/" target="_blank" rel="noopener">用户端智能的应用实践</a>、<a href="http://pingguohe.net/2019/05/14/taobao-user-growth-solutions.html" target="_blank" rel="noopener">苹果核 - 淘宝用户增长的5+1个策略</a> 等</li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2020/01/20/application-of-AARRR-growth-model/">AARRR 增长模型的应用</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">小铁匠Linus</a></p>
+        <p><span>发布时间:</span>2020-01-20, 21:36:09</p>
+        <p><span>最后更新:</span>2020-03-26, 11:26:21</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2020/01/20/application-of-AARRR-growth-model/" title="AARRR 增长模型的应用">http://linusling.com/2020/01/20/application-of-AARRR-growth-model/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://linusling.com/2020/01/20/application-of-AARRR-growth-model/　　作者: 小铁匠Linus" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target="_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/">
+                    迟到但不缺席的 iOS 启动过程以及启动优化
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/12/31/summary-of-2019/">
+                    2019 年终总结与展望
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#AARRR-增长漏斗模型概述"><span class="toc-number">1.</span> <span class="toc-text">AARRR 增长漏斗模型概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Acquisition（获客）"><span class="toc-number">1.1.</span> <span class="toc-text">Acquisition（获客）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Activation（激活、首次转化）"><span class="toc-number">1.2.</span> <span class="toc-text">Activation（激活、首次转化）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Retention（留存）"><span class="toc-number">1.3.</span> <span class="toc-text">Retention（留存）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Referral（传播、分发）"><span class="toc-number">1.4.</span> <span class="toc-text">Referral（传播、分发）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Revenue（变现）"><span class="toc-number">1.5.</span> <span class="toc-text">Revenue（变现）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AARRR-增长漏斗模型的应用"><span class="toc-number">2.</span> <span class="toc-text">AARRR 增长漏斗模型的应用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Acquisition（获客）-1"><span class="toc-number">2.1.</span> <span class="toc-text">Acquisition（获客）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Activation（激活、首次转化）✔️"><span class="toc-number">2.2.</span> <span class="toc-text">Activation（激活、首次转化）✔️</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Retention（留存）✔️"><span class="toc-number">2.3.</span> <span class="toc-text">Retention（留存）✔️</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Referral（传播、分发）✔️"><span class="toc-number">2.4.</span> <span class="toc-text">Referral（传播、分发）✔️</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Revenue（变现）-1"><span class="toc-number">2.5.</span> <span class="toc-text">Revenue（变现）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#增长计划-北极星指标"><span class="toc-number">3.</span> <span class="toc-text">增长计划 - 北极星指标</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#实践步骤"><span class="toc-number">3.1.</span> <span class="toc-text">实践步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#推荐资料"><span class="toc-number">3.2.</span> <span class="toc-text">推荐资料</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录" title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"AARRR 增长模型的应用　| 小铁匠的 Swift 之路　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments" style="margin: 2em; padding: 2em; background: rgba(255, 255, 255, 0.5)">
+    <div id="vcomment" class="comment"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@1.3.4/dist/Valine.min.js"></script>
+    <script>
+      new Valine({
+        el: '#vcomment',
+        notify: 'true',
+        verify: 'true',
+        app_id: "hLFWbqB3d8Daceub0wVqAMtg-gzGzoHsz",
+        app_key: "NbtIrp00zfplsDqRgU2i3JDD",
+        placeholder: "Just 评论一下",
+        avatar: "retro"
+      });
+    </script>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/" title="上一篇: 迟到但不缺席的 iOS 启动过程以及启动优化">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/12/31/summary-of-2019/" title="下一篇: 2019 年终总结与展望">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/03/02/how-to-launch-and-optimize-ios-app-startup-time/">迟到但不缺席的 iOS 启动过程以及启动优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/20/application-of-AARRR-growth-model/">AARRR 增长模型的应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/31/summary-of-2019/">2019 年终总结与展望</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/01/application-of-crawler-and-automation-on-mp/">爬虫与自动化在微信公众号发布文章上的应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/01/summary-of-2018/">2018 年终总结与展望</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/01/02/summary-of-2017/">2017 年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/ios-terminators/">终结者 Terminators</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/28/insights-shell/">真知棒系列之 Shell</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/07/18/insights-git/">真知棒系列之 Git</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/06/06/insights-sql/">真知棒系列之 SQL</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/08/ios-performance-center/">HXPerformanceCenter 性能平台的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/09/dependency-injection-and-typhoon/">依赖注入与Typhoon</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/21/rebase-versus-merge/">Rebase VS Merge</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/summary-of-2016/">2016 年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/reloaddata-and-contentsize/">reloadData 与准确获取 contentSize</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/17/statistics-of-method-time-consuming-in-ios/">全局方法耗时统计之 hook 踩坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/12/shell-programming-for-hangzhou-car-lottery-part1/">Shell 编程之杭州摇号查询（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/01/brief-summary-of-interface-testing/">接口测试小结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/01/brief-summary-of-this-half-year/">2016 半半年总结之工具篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/quick-look-framework/">使用 Quick Look Framework 快速预览文档</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/23/method-swizzling-in-ios/">Runtime 之 Method Swizzling</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/17/tools-for-appicon-and-image-resizing/">AppIcon 生成及图片尺寸更改的利器</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/09/deploy-hexo-using-applescript/">使用 AppleScript 制作自动脚本发布 Hexo</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/04/images-in-hexo-using-qiniu/">使用七牛在 Hexo 文档中嵌入图片</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/git-ignorecase-in-hexo/">Git 文件名大小写的踩坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/02/how-to-build-a-blog-with-hexo/">快速构建基于 Hexo 和 Github 的个人网站</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/08/03/convert-in-swift/">String 与 Int、Double 互相转换的方法及 Error Condition Test</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+<script>
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//zz.bdstatic.com/linksubmit/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+            
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2020 小铁匠Linus
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style="display:none">
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style="display:none">
+                        <span id="page-visit" title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
