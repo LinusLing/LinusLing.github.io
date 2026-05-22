@@ -194,6 +194,9 @@
 
 .sidebar .author__desktop {
   display: none;
+  word-wrap: break-word;      /* 允许长单词换行 */  
+  white-space: normal;        /* 允许文本换行 */  
+  word-break: break-word;     /* 在任意字符间断行 */  
   @media screen and (min-width: 1024px) {
     display: block;
   }
