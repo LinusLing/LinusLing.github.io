@@ -8,21 +8,20 @@ redirect_from:
 ---
 <br />
 
-I am currently a Lecturer in Computer Science at the School of Digital Technology, Zhejiang Technical Institute of Economics. Concurrently, I am pursuing my Ph.D. as a full-time candidate in the School of Computer Science and Technology at Zhejiang Normal University, working in Professor [Xinzhong Zhu](https://mypage.zjnu.edu.cn/ZXZ1/zh_CN/index/67067/list/index.htm)'s research group. Previously, I completed my Master's degree under the guidance of Professor [Xu-Hua Yang](https://homepage.zjut.edu.cn/yxh2/), Director of the Institute of Intelligent Computing at Zhejiang University of Technology. My research interests include Embodied AI, Recommender Systems, Video Retrieval, and Scene Graph Generation.
+I am currently a Lecturer in Computer Science at the School of Digital Technology, Zhejiang Technical Institute of Economics. Concurrently, I am pursuing my Ph.D. as a full-time candidate in the School of Computer Science and Technology at Zhejiang Normal University(ZJNU), working in Professor [Xinzhong Zhu](https://mypage.zjnu.edu.cn/ZXZ1/zh_CN/index/67067/list/index.htm)'s research group. Previously, I completed my Master's degree under the guidance of Professor [Xu-Hua Yang](https://homepage.zjut.edu.cn/yxh2/), Director of the Institute of Intelligent Computing at Zhejiang University of Technology(ZJUT). My research interests include Embodied AI, Recommender Systems, Video Retrieval, and Scene Graph Generation.
 
 <br />
 
-🕛 News
-======
-
-
-<br />
-
-🕑 Publications
+🕑 Publications / Acceptance‌s
 ======
 
 2026
 ------
+* CNP-Diff: 面向推荐的条件邻域扰动扩散模型. (CNP-Diff: Conditional Neighborhood Perturbation Diffusion for Recommendation.)
+  
+  **凌非** 等.
+  
+   _计算机应用研究_ (**Application Research of Computers**).
 * AWLC-Net: Bridging adaptive window and length-sensitive clustering for efficient partial relevant video retrieval.
 
   Zheyan Zhu*, **Fei Ling**.
@@ -36,11 +35,11 @@ I am currently a Lecturer in Computer Science at the School of Digital Technolog
 
 2025
 ------
-* 基于对比学习的数据高效视频检索.
+* 基于对比学习的数据高效视频检索. (Data-efficient video retrieval with contrastive learning.)
   
   **凌非** 等.
   
-   _图学学报_ (**图学学报**).
+   _图学学报_ (**Journal of Graphics**).
 
 <br />
 
