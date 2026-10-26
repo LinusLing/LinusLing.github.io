@@ -17,6 +17,11 @@ I am currently a Lecturer in Computer Science at the School of Digital Technolog
 
 2026
 ------
+* Weak Ties Guided Mining for Social Recommendation.
+
+  **Fei Ling***, Zheyan Zhu.
+  
+  _Pattern Recognition Letters_ (**PR Letters**).
 * CNP-Diff: 面向推荐的条件邻域扰动扩散模型. (CNP-Diff: Conditional Neighborhood Perturbation Diffusion for Recommendation.)
   
   **凌非** 等.
